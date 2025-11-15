@@ -1,0 +1,480 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Projects — AQJ Group</title>
+
+  <link rel="icon" href="favicon.png" type="image/png">
+  <link rel="stylesheet" href="../css/styles.css" />
+  <meta name="description" content="Project portfolio — AQJ Group. View projects, images and videos." />
+
+  <!-- Fonts for Arabic + English verse block -->
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+  <style>
+    /* local page styles */
+    .projects-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px;margin:18px 0 28px;}
+    .project-card{position:relative;overflow:hidden;border-radius:10px;background:var(--card);color:var(--text);box-shadow:0 6px 18px rgba(0,0,0,.25);transition:transform .18s ease,box-shadow .18s ease;cursor:pointer;}
+    .project-card:hover{transform:translateY(-6px);box-shadow:0 12px 28px rgba(0,0,0,.34);}
+    .project-thumb{width:100%;height:200px;object-fit:cover;display:block;background:#111;}
+    .project-meta{padding:12px 14px;}
+    .project-meta h3{margin:0 0 6px;font-size:1.05rem;}
+    .project-meta p{margin:0;color:var(--muted);font-size:.95rem;}
+
+    .pj-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);display:none;align-items:center;justify-content:center;z-index:9999;padding:28px;}
+    .pj-overlay.open{display:flex;}
+    .pj-panel{width:min(1180px,96%);height:min(92vh,920px);background:var(--surface);border-radius:12px;overflow:hidden;display:grid;grid-template-columns:1fr 380px;}
+    .pj-main{position:relative;background:#000;display:flex;flex-direction:column;justify-content:center;align-items:center;}
+    .pj-media{width:100%;height:100%;display:flex;align-items:center;justify-content:center;}
+    .pj-media img,.pj-media video{max-width:100%;max-height:100%;object-fit:contain;display:block;}
+    .pj-sidebar{padding:18px;overflow-y:auto;background:var(--card);}
+    .pj-topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 18px;z-index:20;position:absolute;top:0;left:0;right:0;}
+    .pj-close{background:transparent;border:none;color:var(--muted);font-size:18px;cursor:pointer;}
+    .pj-btn{background:rgba(0,0,0,.45);border:none;color:#fff;padding:8px 10px;border-radius:8px;cursor:pointer;}
+    .pj-thumbs{display:flex;gap:6px;overflow-x:auto;padding:10px;background:linear-gradient(transparent,rgba(0,0,0,.04));position:absolute;left:0;right:0;bottom:0;z-index:20;}
+    .pj-thumb{width:72px;height:56px;flex:0 0 auto;object-fit:cover;border-radius:6px;cursor:pointer;opacity:.8;border:2px solid transparent;}
+    .pj-thumb.active{border-color:var(--accent);opacity:1;}
+    @media (max-width:900px){.pj-panel{grid-template-columns:1fr;grid-template-rows:1fr auto;height:100vh;width:100%;border-radius:0}.pj-sidebar{max-height:36vh}}
+
+    /* ========== Marquee & verse styles (same robust version used across site) ========== */
+    :root { --marquee-duration: 18s; }
+
+    .top-marquee {
+      width:100%;
+      height:56px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      overflow:hidden;
+      position:relative;
+      background: linear-gradient(90deg, rgba(8,8,8,0.72), rgba(12,12,12,0.55));
+      border-bottom:1px solid rgba(255,255,255,0.06);
+      padding:0 12px;
+      z-index:50;
+      box-sizing:border-box;
+      backdrop-filter: blur(4px);
+      margin-bottom: 12px;
+    }
+
+    .runner {
+      position:absolute;
+      top:50%;
+      left:0;
+      transform:translateY(-50%);
+      pointer-events:none;
+      white-space:nowrap;
+      animation: runnerTravel var(--marquee-duration) linear infinite;
+      will-change: transform, opacity;
+    }
+    .runner.runner-2 { animation-delay: calc(var(--marquee-duration) / -2); }
+
+    .marquee-pill {
+      display:inline-flex;
+      align-items:center;
+      gap:12px;
+      padding:8px 36px;
+      border-radius:999px;
+      background: rgba(255,255,255,0.04);
+      box-shadow: 0 6px 18px rgba(0,0,0,0.45) inset;
+      color:#fff;
+      font-family: "Amiri", serif;
+      font-weight:700;
+      font-size:1.08rem;
+      line-height:1;
+      text-align:center;
+      transform: translateZ(0);
+      opacity: 0;
+      animation: pillOpacity var(--marquee-duration) linear infinite;
+    }
+    .runner.runner-2 .marquee-pill { animation-delay: calc(var(--marquee-duration) / -2); }
+
+    .marquee-pill .trans {
+      font-family: "Poppins", sans-serif;
+      font-size:0.82rem;
+      color: rgba(255,255,255,0.92);
+      margin-left:12px;
+      white-space: nowrap;
+    }
+
+    @keyframes runnerTravel {
+      0% { transform: translateX(calc(100vw)) translateY(-50%); }
+      100% { transform: translateX(calc(-100% - 100vw)) translateY(-50%); }
+    }
+
+    @keyframes pillOpacity {
+      0% { opacity: 0; }
+      10% { opacity: 1; }
+      90% { opacity: 1; }
+      100% { opacity: 0; }
+    }
+
+    .top-marquee::before,
+    .top-marquee::after {
+      content:"";
+      position:absolute;
+      top:0; bottom:0; width:6%;
+      pointer-events:none; z-index:30;
+    }
+    .top-marquee::before { left:0; background: linear-gradient(to right, rgba(8,8,8,1), rgba(8,8,8,0)); }
+    .top-marquee::after  { right:0; background: linear-gradient(to left, rgba(8,8,8,1), rgba(8,8,8,0)); }
+
+    .top-marquee:hover .runner,
+    .top-marquee:hover .runner .marquee-pill { animation-play-state: paused; }
+
+    /* Featured verse block */
+    .verse-block {
+      max-width: 920px;
+      margin: 6px auto 18px;
+      padding: 14px 18px;
+      border-radius: 12px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border: 1px solid rgba(255,255,255,0.03);
+      box-shadow: 0 6px 18px rgba(0,0,0,0.22);
+      color: var(--muted, #d6d6d6);
+      text-align: center;
+      position: relative;
+    }
+    .verse-block .arabic {
+      font-family: "Amiri", serif;
+      font-size: 1.45rem;
+      font-weight: 700;
+      color: #ffffff;
+      direction: rtl;
+      line-height: 1.25;
+      margin-bottom: 8px;
+      text-shadow: 0 1px 6px rgba(0,0,0,0.35);
+    }
+    .verse-block .translation {
+      font-family: "Poppins", sans-serif;
+      font-size: 1rem;
+      color: rgba(255,255,255,0.92);
+      margin-bottom: 8px;
+    }
+    .verse-block .caption {
+      font-family: "Poppins", sans-serif;
+      font-size: 0.94rem;
+      color: var(--muted, #cfcfcf);
+      margin-top: 6px;
+      font-weight: 300;
+    }
+
+    @media (max-width:900px) {
+      :root { --marquee-duration: 14s; }
+      .top-marquee { height:52px; }
+      .marquee-pill { padding:6px 18px; font-size:1rem; }
+      .marquee-pill .trans { font-size:0.75rem; margin-left:8px; }
+      .verse-block { margin:12px; padding:10px 12px; }
+      .verse-block .arabic { font-size:1.15rem; }
+      .verse-block .translation { font-size:0.95rem; }
+    }
+  </style>
+</head>
+<body data-page="projects">
+
+  <!-- header injected by include-partials.js -->
+  <div id="header-placeholder"></div>
+
+  <!-- MOVING MARQUEE -->
+  <div class="top-marquee" role="region" aria-label="Scrolling Qur'anic verse">
+    <div class="runner runner-1" aria-hidden="true">
+      <div class="marquee-pill">
+        <span class="arabic" lang="ar">اللَّهُ الَّذِي رَفَعَ السَّمَاوَاتِ بِغَيْرِ عَمَدٍ تَرَوْنَهَا</span>
+        <span class="trans">“Allah is the One Who raised the heavens without any pillars that you can see.” — Ar-Ra'd 13:2</span>
+      </div>
+    </div>
+
+    <div class="runner runner-2" aria-hidden="true">
+      <div class="marquee-pill">
+        <span class="arabic" lang="ar">اللَّهُ الَّذِي رَفَعَ السَّمَاوَاتِ بِغَيْرِ عَمَدٍ تَرَوْنَهَا</span>
+        <span class="trans">“Allah is the One Who raised the heavens without any pillars that you can see.” — Ar-Ra'd 13:2</span>
+      </div>
+    </div>
+  </div>
+
+  <main class="container section" style="padding-top:36px;padding-bottom:40px;">
+    <header style="margin-bottom:20px;">
+      <h1 style="margin:0 0 6px;">Our Projects</h1>
+      <p style="color:var(--muted);max-width:900px;">Explore selected projects — click any card to open the gallery (images + video).</p>
+    </header>
+
+    <div style="display:flex;gap:12px;align-items:center;margin-bottom:16px;">
+      <input id="searchBox" placeholder="Search projects..." style="padding:8px 10px;border-radius:6px;border:1px solid rgba(0,0,0,.08);width:320px;">
+      <select id="filterMarket" style="padding:8px;border-radius:6px;">
+        <option value="">All markets</option>
+      </select>
+      <div style="margin-left:auto;color:var(--muted)">Total projects: <span id="totalCount">0</span></div>
+    </div>
+
+    <div id="projectsGrid" class="projects-grid" aria-live="polite"></div>
+
+    <!-- Overlay: detail + gallery -->
+    <div id="pjOverlay" class="pj-overlay" aria-hidden="true" role="dialog" aria-modal="true">
+      <div class="pj-panel" role="document">
+        <div class="pj-main">
+          <div class="pj-topbar">
+            <div style="display:flex;gap:8px;align-items:center;">
+              <button id="pjPrev" class="pj-btn" aria-label="Previous">◀</button>
+              <button id="pjNext" class="pj-btn" aria-label="Next">▶</button>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <button id="pjOpenVideo" class="pj-btn" title="Play project video">▶ Video</button>
+              <button id="pjClose" class="pj-close" aria-label="Close">✕</button>
+            </div>
+          </div>
+
+          <div class="pj-media" id="pjMediaArea" aria-live="polite"></div>
+          <div id="pjThumbs" class="pj-thumbs" aria-hidden="false"></div>
+        </div>
+
+        <aside class="pj-sidebar">
+          <h2 id="pjTitle">Project Title</h2>
+          <div class="meta" id="pjMeta"></div>
+          <p id="pjSummary" style="color:var(--muted);margin-bottom:12px;"></p>
+          <div style="margin-top:12px;">
+            <strong>Project details</strong>
+            <ul id="pjDetails" style="color:var(--muted);margin:8px 0 0 18px;"></ul>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </main>
+
+  <div id="footer-placeholder"></div>
+
+  <script src="include-partials.js" defer></script>
+
+  <script>
+  // Projects loader with safe fallback (embed defaultProjects so page always shows)
+  document.addEventListener("DOMContentLoaded", function () {
+    const candidatePaths = [
+      "../data/projects.json",
+      "/frontend/data/projects.json",
+      "./../data/projects.json",
+      "/data/projects.json",
+      "data/projects.json"
+    ];
+
+    // ---------- default (fallback) projects - edit these later or replace by external JSON ----------
+    const defaultProjects = [
+      {
+        "id":"riverside-tower",
+        "title":"Riverside Residential Tower",
+        "summary":"28-storey residential tower — LOD350 coordination & COBie handover.",
+        "location":"Mumbai, India",
+        "markets":["Residential"],
+        "thumb":"../assets/projects/riverside-tower/thumb.jpg",
+        "video":"../assets/projects/riverside-tower/video.mp4",
+        "thumbVideoPoster":"../assets/projects/riverside-tower/video-poster.jpg",
+        "images":[
+          "../assets/projects/riverside-tower/images/img01.jpg",
+          "../assets/projects/riverside-tower/images/img02.jpg",
+          "../assets/projects/riverside-tower/images/img03.jpg"
+        ],
+        "details":["LOD350 coordination model","COBie-ready asset export","Clash reduction: 87% fewer field clashes"]
+      },
+      {
+        "id":"greenfield-campus",
+        "title":"Greenfield Commercial Campus",
+        "summary":"Multi-building campus with integrated services and fabrication-level MEP models.",
+        "location":"Pune, India",
+        "markets":["Commercial"],
+        "thumb":"../assets/projects/greenfield-campus/thumb.jpg",
+        "video":"../assets/projects/greenfield-campus/video.mp4",
+        "images":[
+          "../assets/projects/greenfield-campus/images/img01.jpg",
+          "../assets/projects/greenfield-campus/images/img02.jpg"
+        ],
+        "details":["Federated model coordination","4D construction sequencing","Fabrication-ready MEP deliverables"]
+      }
+    ];
+    // -----------------------------------------------------------------------------------------------
+
+    // DOM refs
+    const grid = document.getElementById("projectsGrid");
+    const totalCount = document.getElementById("totalCount");
+    const searchBox = document.getElementById("searchBox");
+    const filterMarket = document.getElementById("filterMarket");
+
+    // overlay refs
+    const overlay = document.getElementById("pjOverlay");
+    const pjMedia = document.getElementById("pjMediaArea");
+    const pjTitle = document.getElementById("pjTitle");
+    const pjMeta = document.getElementById("pjMeta");
+    const pjSummary = document.getElementById("pjSummary");
+    const pjDetails = document.getElementById("pjDetails");
+    const pjThumbs = document.getElementById("pjThumbs");
+    const btnClose = document.getElementById("pjClose");
+    const btnPrev = document.getElementById("pjPrev");
+    const btnNext = document.getElementById("pjNext");
+    const btnOpenVideo = document.getElementById("pjOpenVideo");
+
+    let projects = [];
+    let visibleProjects = [];
+    let currentProject = null;
+    let currentMediaList = [];
+    let currentIndex = 0;
+
+    // helper: try fetching the JSON from multiple candidate paths
+    async function fetchAny(paths){
+      for(const p of paths){
+        try {
+          const res = await fetch(p);
+          if(!res.ok) continue;
+          const json = await res.json();
+          console.log("Loaded projects.json from:", p);
+          return json;
+        } catch(e) { /* ignore, try next */ }
+      }
+      return null;
+    }
+
+    // safe escape for titles used in markup
+    function escapeHtml(s){ return (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+
+    function renderCard(p){
+      const card = document.createElement("article");
+      card.className = "project-card";
+      card.tabIndex = 0;
+      card.setAttribute("data-id", p.id);
+      const thumb = p.thumb || "../assets/projects/default-thumb.jpg";
+      card.innerHTML = `<img class="project-thumb" loading="lazy" alt="${escapeHtml(p.title)}" src="${thumb}">
+                        <div class="project-meta"><h3>${escapeHtml(p.title)}</h3><p>${escapeHtml(p.summary||"")}</p></div>`;
+      card.addEventListener("click", ()=> openProject(p.id));
+      card.addEventListener("keydown", (e)=> { if(e.key==="Enter") openProject(p.id); });
+      return card;
+    }
+
+    function renderGrid(list){
+      grid.innerHTML = "";
+      for(const p of list) grid.appendChild(renderCard(p));
+      totalCount.textContent = list.length;
+    }
+
+    function populateFilterOptions(list){
+      const markets = Array.from(new Set(list.flatMap(p => p.markets || []))).sort();
+      filterMarket.innerHTML = '<option value="">All markets</option>' + markets.map(m=> `<option value="${m}">${m}</option>`).join("");
+    }
+
+    // build media list (video first if present)
+    function buildMediaList(p){
+      const list = [];
+      if(p.video) list.push({type:'video', src:p.video});
+      if(Array.isArray(p.images)) for(const img of p.images) list.push({type:'image', src:img});
+      if(!list.length && p.thumb) list.push({type:'image', src:p.thumb});
+      return list;
+    }
+
+    function showMedia(index){
+      if(!currentMediaList || !currentMediaList.length) return;
+      if(index<0) index = currentMediaList.length-1;
+      if(index>= currentMediaList.length) index = 0;
+      currentIndex = index;
+      const m = currentMediaList[index];
+      pjMedia.innerHTML = "";
+      if(m.type === 'video'){
+        const v = document.createElement("video");
+        v.src = m.src; v.controls = true; v.autoplay = true; v.playsInline = true; v.style.maxWidth="100%"; v.style.maxHeight="100%";
+        pjMedia.appendChild(v);
+      } else {
+        const img = document.createElement("img");
+        img.src = m.src; img.alt = (currentProject.title||"") + " image " + (index+1); img.loading = "eager";
+        pjMedia.appendChild(img);
+      }
+      Array.from(pjThumbs.children).forEach((t,i)=> t.classList.toggle("active", i===index));
+    }
+
+    function openProject(id){
+      const p = projects.find(x=>x.id===id);
+      if(!p) return;
+      currentProject = p;
+      currentMediaList = buildMediaList(p);
+      currentIndex = 0;
+
+      pjTitle.textContent = p.title;
+      pjMeta.innerHTML = `<div><strong>Market(s):</strong> ${(p.markets||[]).join(', ')}</div><div><strong>Location:</strong> ${p.location || '—'}</div>`;
+      pjSummary.textContent = p.summary || "";
+
+      pjDetails.innerHTML = "";
+      (p.details||[]).forEach(d=> { const li=document.createElement("li"); li.textContent = d; pjDetails.appendChild(li); });
+
+      pjThumbs.innerHTML = "";
+      currentMediaList.forEach((m,i)=>{
+        const thumb = document.createElement("img");
+        thumb.className = "pj-thumb"; thumb.loading = "lazy";
+        thumb.alt = p.title + " thumb " + (i+1);
+        thumb.src = (m.type === 'video') ? (p.thumbVideoPoster || p.thumb || m.src) : m.src;
+        thumb.addEventListener("click", ()=> showMedia(i));
+        pjThumbs.appendChild(thumb);
+      });
+
+      showMedia(0);
+      overlay.classList.add("open"); overlay.setAttribute("aria-hidden","false");
+      btnClose.focus(); document.body.style.overflow = 'hidden';
+    }
+
+    function closeOverlay(){ overlay.classList.remove("open"); overlay.setAttribute("aria-hidden","true"); pjMedia.innerHTML = ""; document.body.style.overflow = ''; currentProject = null; }
+
+    function applyFilters(){
+      const q = (searchBox.value||"").trim().toLowerCase();
+      const market = filterMarket.value;
+      visibleProjects = projects.filter(p=>{
+        if(market && !(p.markets||[]).includes(market)) return false;
+        if(!q) return true;
+        return (p.title||"").toLowerCase().includes(q) || (p.summary||"").toLowerCase().includes(q);
+      });
+      renderGrid(visibleProjects);
+    }
+
+    // buttons & keyboard
+    btnClose.addEventListener("click", closeOverlay);
+    btnPrev.addEventListener("click", ()=> showMedia(currentIndex-1));
+    btnNext.addEventListener("click", ()=> showMedia(currentIndex+1));
+    btnOpenVideo.addEventListener("click", ()=> {
+      const vid = currentMediaList.findIndex(m => m.type === 'video');
+      if(vid >= 0) showMedia(vid);
+    });
+    document.addEventListener("keydown", (e)=> {
+      if(!overlay.classList.contains("open")) return;
+      if(e.key === "Escape") closeOverlay();
+      if(e.key === "ArrowRight") showMedia(currentIndex+1);
+      if(e.key === "ArrowLeft") showMedia(currentIndex-1);
+    });
+    overlay.addEventListener("click", (e)=> { if(e.target === overlay) closeOverlay(); });
+
+    // initialize: try fetch external JSON; fallback to defaultProjects
+    (async function init(){
+      let data = await fetchAny(candidatePaths);
+      if(!data) {
+        console.warn("projects.json not loaded; using embedded defaultProjects");
+        data = defaultProjects;
+      }
+      projects = Array.isArray(data) ? data : [];
+      // normalize minimal fields to avoid UI errors
+      projects = projects.map((p,i)=>({
+        id: p.id || ("pj"+(i+1)),
+        title: p.title || ("Project "+(i+1)),
+        summary: p.summary || "",
+        thumb: p.thumb || "../assets/projects/default-thumb.jpg",
+        images: Array.isArray(p.images) ? p.images : [],
+        video: p.video || null,
+        thumbVideoPoster: p.thumbVideoPoster || null,
+        markets: Array.isArray(p.markets) ? p.markets : [],
+        location: p.location || "",
+        details: Array.isArray(p.details) ? p.details : []
+      }));
+
+      populateFilterOptions(projects);
+      visibleProjects = [...projects];
+      renderGrid(visibleProjects);
+
+      filterMarket.addEventListener("change", applyFilters);
+      searchBox.addEventListener("input", ()=> setTimeout(applyFilters, 120));
+    })();
+
+  }); // DOMContentLoaded end
+  </script>
+
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

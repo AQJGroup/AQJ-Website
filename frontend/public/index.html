@@ -1,0 +1,550 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <!-- Make sure viewport is correct for mobile -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.2, viewport-fit=cover" />
+  <title>AQJ Group — Digital Construction & BIM</title>
+
+  <!-- Favicon -->
+  <link rel="icon" href="favicon.png" type="image/png">
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="../css/styles.css" />
+  <meta name="description" content="AQJ Group — BIM, model coordination, digital twin & construction technology." />
+
+  <!-- Fonts (kept) -->
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@700&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+
+  <style>
+    /* ---------- NAVBAR (unchanged) ---------- */
+    .navbar { padding-top: 8px; padding-bottom: 8px; }
+    .nav-inner { align-items: center; gap: 18px; }
+    .brand .logo, .logo { height: 56px; width: auto; display: block; }
+    .nav a { display:inline-block;padding:6px 12px;text-decoration:none; }
+
+    /* ====== Robust Marquee: No clipping on Arabic ====== */
+    :root {
+      --duration: 18s;  /* total travel time — lower = faster */
+      --gap: 26px;      /* gap between runs */
+    }
+
+    .top-marquee {
+      width:100%;
+      height:56px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      overflow:hidden;
+      position:relative;
+      background: linear-gradient(90deg, rgba(8,8,8,0.72), rgba(12,12,12,0.55));
+      border-bottom:1px solid rgba(255,255,255,0.06);
+      padding:0 12px;
+      z-index:50;
+      box-sizing:border-box;
+      backdrop-filter: blur(4px);
+      /* moved up slightly so it fills the blank space under the header */
+      margin-top: -14px; /* small negative offset to pull the bar upward */
+    }
+
+    /* runner wrapper: absolute so items can travel full width */
+    .runner {
+      position:absolute;
+      top:50%;
+      left:0;
+      transform:translateY(-50%);
+      pointer-events:none;
+      white-space:nowrap;
+      animation: runnerTravel var(--duration) linear infinite;
+      will-change: transform, opacity;
+    }
+
+    /* second runner staggered so there is always a pill in motion */
+    .runner.runner-2 { animation-delay: calc(var(--duration) / -2); }
+
+    /* pill appearance (no clipping on text) */
+    .marquee-pill {
+      display:inline-flex;
+      align-items:center;
+      gap:12px;
+      padding:8px 36px;
+      border-radius:999px;
+      background: rgba(255,255,255,0.04);
+      box-shadow: 0 6px 18px rgba(0,0,0,0.45) inset;
+      color:#fff;
+      font-family: "Amiri", serif;
+      font-weight:700;
+      font-size:1.08rem;
+      line-height:1;
+      text-align:center;
+      transform: translateZ(0); /* force GPU layer for smoothness */
+      will-change: transform, opacity;
+      opacity: 0; /* will fade in as it enters */
+    }
+
+    .marquee-pill .trans {
+      font-family: "Poppins", sans-serif;
+      font-size:0.82rem;
+      color: rgba(255,255,255,0.92);
+      margin-left:12px;
+      white-space: nowrap;
+    }
+
+    /* UNIFORM MOVEMENT: constant linear speed from off-right -> off-left */
+    @keyframes runnerTravel {
+      0% {
+        transform: translateX(calc(100vw)) translateY(-50%);
+      }
+      100% {
+        transform: translateX(calc(-100% - 100vw)) translateY(-50%);
+      }
+    }
+
+    /* gentle fade in/out only (no positional acceleration) */
+    @keyframes pillOpacity {
+      0% { opacity: 0; }
+      10% { opacity: 1; }
+      90% { opacity: 1; }
+      100% { opacity: 0; }
+    }
+
+    /* Apply opacity animation on the pill via animation shorthand with matching timing */
+    .runner .marquee-pill {
+      animation: pillOpacity var(--duration) linear infinite;
+      animation-fill-mode: both;
+    }
+    .runner.runner-2 .marquee-pill { animation-delay: calc(var(--duration) / -2); }
+
+    /* soft fade masks at edges */
+    .top-marquee::before,
+    .top-marquee::after {
+      content: "";
+      position: absolute;
+      top: 0; bottom: 0; width: 6%;
+      pointer-events: none; z-index: 30;
+    }
+    .top-marquee::before { left: 0; background: linear-gradient(to right, rgba(8,8,8,1), rgba(8,8,8,0)); }
+    .top-marquee::after  { right:0; background: linear-gradient(to left, rgba(8,8,8,1), rgba(8,8,8,0)); }
+
+    /* pause on hover for readability */
+    .top-marquee:hover .runner,
+    .top-marquee:hover .runner .marquee-pill { animation-play-state: paused; }
+
+    @media (max-width:900px) {
+      :root { --duration: 14s; }
+      .top-marquee { height:52px; padding: 0 8px; }
+      .marquee-pill { padding:6px 18px; font-size:1rem; }
+      .marquee-pill .trans { font-size:0.75rem; margin-left:8px; }
+    }
+
+    /* Small helper class for mobile menu button placed in header (injected via JS) */
+    .mobile-menu-btn {
+      display: none;
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.08);
+      color: var(--text);
+      padding: 8px 10px;
+      border-radius: 8px;
+      font-size: 20px;
+      line-height:1;
+      cursor: pointer;
+    }
+    @media (max-width:900px) {
+      .mobile-menu-btn { display:inline-flex; align-items:center; justify-content:center; min-width:44px; min-height:44px; }
+      /* hide the desktop nav by default on small screens; will be toggled by JS */
+      .site-header .nav { display: none !important; }
+      .site-header .nav.mobile-open {
+        display: flex !important;
+        flex-direction: column;
+        gap: 12px;
+        position: absolute;
+        left: 12px;
+        right: 12px;
+        top: calc(100% + 8px);
+        padding: 12px;
+        background: var(--surface);
+        border-radius: 10px;
+        box-shadow: 0 12px 30px rgba(0,0,0,0.28);
+      }
+      /* ensure nav links are tappable */
+      .site-header .nav.mobile-open a { padding: 10px 12px; display:block; border-radius:6px; }
+    }
+
+    /* ------------------ ADDED RULES (for your requests) ------------------ */
+    /* 1) Increase logo size by 1.5% (using site's --logo-height) */
+    .site-header .logo img {
+      /* multiply the base logo height by 1.015 to increase by 1.5% */
+      height: calc(var(--logo-height) * 1.015) !important;
+      max-height: calc(var(--logo-height) * 1.4) !important;
+    }
+
+    /* 2) Center-align the header content: logo and nav are centered horizontally */
+    /* These selectors are intentionally scoped to .site-header so they won't change other pages. */
+    .site-header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+    /* ensure brand (logo) and nav sit centered */
+    .site-header .brand,
+    .site-header .nav {
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+    }
+    /* center nav entries horizontally and keep spacing */
+    .site-header .nav {
+      justify-content: center;
+      gap: 22px;
+    }
+
+    /* 3) Move the top-marquee upward (already given small negative margin above),
+       and also nudge the hero up so it fills that blank space */
+    .hero {
+      /* small upward offset so the hero banner sits closer to the header + marquee */
+      margin-top: -12px;
+      /* ensure hero still has the same visual stacking */
+      z-index: 0;
+    }
+
+    /* Minor tweak: reduce header bottom padding to tighten the header area */
+    .site-header {
+      padding-bottom: 8px; /* tightened from default */
+    }
+
+    /* Keep desktop layout stable; mobile adjustments remain handled by existing media queries */
+    @media (max-width:900px) {
+      /* avoid overlapping on small screens */
+      .top-marquee { margin-top: 0; }
+      .hero { margin-top: 0; }
+      .site-header .logo img { height: calc(var(--logo-height) * 1.02) !important; }
+    }
+    /* ---------------- end of added rules ------------------ */
+
+  </style>
+</head>
+
+<body data-page="home">
+
+  <!-- Header (auto-injected) -->
+  <div id="header-placeholder"></div>
+
+  <!-- Simple robust marquee (no glyph clipping) -->
+  <div class="top-marquee" role="region" aria-label="Scrolling Qur'anic verse">
+    <div class="runner runner-1" aria-hidden="true">
+      <div class="marquee-pill">
+        <span class="arabic" lang="ar" dir="rtl">رَبِّ زِدْنِي عِلْمًا</span>
+        <span class="trans">“My Lord, increase me in knowledge.” — Taha 20:114</span>
+      </div>
+    </div>
+
+    <div class="runner runner-2" aria-hidden="true">
+      <div class="marquee-pill">
+        <span class="arabic" lang="ar" dir="rtl">رَبِّ زِدْنِي عِلْمًا</span>
+        <span class="trans">“My Lord, increase me in knowledge.” — Taha 20:114</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- HERO -->
+  <section class="hero" aria-label="Hero">
+    <video class="hero-video" autoplay muted loop playsinline poster="../assets/images/projects/project01/thumb.jpg">
+      <source src="../assets/videos/hero.mp4" type="video/mp4">
+    </video>
+
+    <div class="hero-content container">
+      <div class="hero-inner" style="max-width:980px;margin:0 auto;text-align:center">
+        <h1 style="font-size:34px;line-height:1.1;margin:0 0 8px;">Transforming Construction Through Digital Innovation</h1>
+        <p style="color:var(--muted);margin:0 0 18px;">
+          We deliver precision, efficiency and actionable asset data across design, build and operations using BIM and Digital Twin workflows.
+        </p>
+        <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:10px;">
+          <a class="btn primary" href="contact.html">Get a Quote</a>
+          <a class="btn outline" href="projects.html">Explore Projects</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== IFC VIEWER SECTION (moved inside body, before footer) ===== -->
+  <section id="ifc-section" class="container" style="padding:30px 20px;">
+    <h2 style="margin:0 0 12px;text-align:center;">Interactive IFC Viewer</h2>
+    <p style="color:var(--muted);text-align:center;margin:0 0 18px;max-width:920px;margin-left:auto;margin-right:auto;">
+      Load an IFC model to view, rotate, zoom and inspect. Use the controls below to load from a URL or your local machine.
+    </p>
+
+    <div style="display:flex;gap:12px;align-items:center;justify-content:center;margin-bottom:12px;flex-wrap:wrap;">
+      <label style="display:inline-flex;align-items:center;gap:8px;">
+        <input id="ifcFileInput" type="file" accept=".ifc" style="display:inline-block" />
+        <span style="font-weight:600;color:var(--muted);font-size:0.95rem;">Open local IFC</span>
+      </label>
+
+      <div style="display:flex;gap:8px;align-items:center;">
+        <input id="ifcUrlInput" placeholder="Paste IFC URL (http(s)://.../model.ifc)" style="min-width:360px;padding:8px;border-radius:6px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:var(--text)">
+        <button id="ifcLoadUrlBtn" class="btn" style="padding:8px 12px;">Load URL</button>
+      </div>
+
+      <button id="ifcFitBtn" class="btn" style="padding:8px 12px;">Fit to view</button>
+      <button id="ifcWireBtn" class="btn" style="padding:8px 12px;">Toggle edges</button>
+      <button id="ifcBgBtn" class="btn" style="padding:8px 12px;">Toggle bg</button>
+    </div>
+
+    <!-- viewer container -->
+    <div id="ifc-viewer-container" style="width:100%;height:520px;border-radius:12px;overflow:hidden;border:1px solid rgba(255,255,255,0.04);box-shadow:0 10px 30px rgba(0,0,0,0.35);"></div>
+
+    <div style="margin-top:8px;color:var(--muted);font-size:0.9rem;text-align:center;">
+      Tip: Left-drag rotate, right-drag (or two-finger) pan, wheel/pinch to zoom. Click an element to isolate it.
+    </div>
+  </section>
+  <!-- ===== end IFC section ===== -->
+
+  <!-- Footer -->
+  <div id="footer-placeholder"></div>
+
+  <!-- Scripts (keep includes) -->
+  <script src="include-partials.js" defer></script>
+  <script src="../js/app.js" defer></script>
+
+  <!-- web-ifc-viewer + three.js via CDN (UMD builds) - must be loaded before viewer init -->
+  <script src="https://unpkg.com/three@0.154.0/build/three.min.js"></script>
+  <script src="https://unpkg.com/web-ifc-viewer@0.0.73/dist/index.umd.js"></script>
+
+  <script>
+    (function () {
+      // utility to wait for an element to appear (used for header injection)
+      function waitFor(selector, timeout = 3000) {
+        return new Promise((resolve, reject) => {
+          const el = document.querySelector(selector);
+          if (el) return resolve(el);
+          const obs = new MutationObserver(() => {
+            const e = document.querySelector(selector);
+            if (e) {
+              obs.disconnect();
+              resolve(e);
+            }
+          });
+          obs.observe(document.documentElement, { childList: true, subtree: true });
+          setTimeout(() => {
+            obs.disconnect();
+            reject(new Error('timeout waiting for ' + selector));
+          }, timeout);
+        });
+      }
+
+      // After DOM and header injection
+      document.addEventListener('DOMContentLoaded', function () {
+        // wait for header (element created by include-partials.js). Try a few sensible selectors:
+        const headerSelectors = ['.site-header', '#header', '#siteHeader', 'header.navbar', '.navbar', '#header-placeholder'];
+        (async function attachHeaderHelpers() {
+          let header = null;
+          for (const sel of headerSelectors) {
+            try {
+              header = await waitFor(sel, 2500);
+              if (header) break;
+            } catch (e) { /* ignore and continue */ }
+          }
+
+          // fallback: if header-placeholder exists but the real header hasn't been injected, try to use placeholder element
+          if (!header) header = document.getElementById('header-placeholder') || document.querySelector('header');
+
+          if (!header) {
+            // nothing to attach to - nothing to do
+            return;
+          }
+
+          // Try to find nav inside header
+          const nav = header.querySelector('.nav') || header.querySelector('nav');
+          // If nav is not found, we still add a mobile button to header placeholder (safe)
+          // Inject a mobile menu button if one doesn't exist already
+          let mobileBtn = header.querySelector('.mobile-menu-btn') || document.createElement('button');
+          if (!header.contains(mobileBtn)) {
+            mobileBtn.className = 'mobile-menu-btn';
+            mobileBtn.setAttribute('aria-expanded', 'false');
+            mobileBtn.setAttribute('aria-label', 'Open menu');
+            mobileBtn.innerHTML = '&#9776;'; // hamburger
+            // insert as first child of header's inner container if exists, else append
+            const insertBefore = header.querySelector('.nav-inner') || header.querySelector('.brand') || header;
+            try { insertBefore.insertBefore(mobileBtn, insertBefore.firstChild); } catch (e) { header.insertBefore(mobileBtn, header.firstChild); }
+          }
+
+          // toggle function
+          function toggleNav() {
+            if (!nav) return;
+            const open = nav.classList.toggle('mobile-open');
+            mobileBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+            // if opening, ensure it's on top
+            if (open) { nav.focus && nav.focus(); }
+          }
+
+          // attach click
+          mobileBtn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            toggleNav();
+          });
+
+          // close nav when clicking outside
+          document.addEventListener('click', function (e) {
+            if (!nav || !nav.classList.contains('mobile-open')) return;
+            if (!nav.contains(e.target) && !mobileBtn.contains(e.target)) nav.classList.remove('mobile-open');
+          });
+
+          // Make hover-only submenus work on touch:
+          // detect touch devices
+          const isTouch = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
+          if (isTouch && nav) {
+            // convert ".has-submenu" items (common pattern) - toggle on first tap
+            nav.querySelectorAll('.has-submenu, .has-dropdown, .has-subnav').forEach(function (parent) {
+              // add a toggle button if not present to make it accessible
+              if (!parent.querySelector('.submenu-toggle')) {
+                const link = parent.querySelector('a');
+                const btn = document.createElement('button');
+                btn.className = 'submenu-toggle';
+                btn.setAttribute('aria-expanded', 'false');
+                btn.style.marginLeft = '8px';
+                btn.style.background = 'transparent';
+                btn.style.border = 'none';
+                btn.style.color = 'inherit';
+                btn.style.fontSize = '18px';
+                btn.innerHTML = '▾';
+                // append toggle after the link (if exists)
+                if (link && link.parentNode) link.parentNode.insertBefore(btn, link.nextSibling);
+                btn.addEventListener('click', function (ev) {
+                  ev.preventDefault();
+                  ev.stopPropagation();
+                  const open = parent.classList.toggle('submenu-open');
+                  btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+                });
+              }
+            });
+
+            // close submenus when tapping outside
+            document.addEventListener('touchstart', function (ev) {
+              document.querySelectorAll('.submenu-open').forEach(function (el) {
+                if (!el.contains(ev.target)) el.classList.remove('submenu-open');
+              });
+            }, {passive:true});
+          }
+
+        })(); // attachHeaderHelpers()
+      }); // DOMContentLoaded
+    })();
+  </script>
+
+  <!-- Viewer init script (runs after three + web-ifc-viewer are loaded) -->
+  <script>
+    (function () {
+      document.addEventListener('DOMContentLoaded', async () => {
+        const container = document.getElementById('ifc-viewer-container');
+        if (!container) return;
+
+        // Create viewer instance
+        const viewer = new window.IfcViewerAPI({ container, backgroundColor: 0x101010 });
+
+        // ===== IMPORTANT:
+        // If you host web-ifc.wasm locally, set the path to the folder containing web-ifc.wasm.
+        // Example if you put wasm in: /frontend/public/libs/web-ifc/web-ifc.wasm
+        // then use: await viewer.IFC.setWasmPath('/libs/web-ifc/');
+        //
+        // For the CDN fallback we set the unpkg package root (viewer will request web-ifc.wasm):
+        await viewer.IFC.setWasmPath('https://unpkg.com/web-ifc@0.0.134/');
+
+        let edgesShown = false;
+        let darkBg = true;
+        let loadedModel = null;
+
+        // UI refs
+        const fileInput = document.getElementById('ifcFileInput');
+        const urlInput = document.getElementById('ifcUrlInput');
+        const loadUrlBtn = document.getElementById('ifcLoadUrlBtn');
+        const fitBtn = document.getElementById('ifcFitBtn');
+        const wireBtn = document.getElementById('ifcWireBtn');
+        const bgBtn = document.getElementById('ifcBgBtn');
+
+        async function clearModel() {
+          try {
+            if (!loadedModel) return;
+            viewer.scene.removeModel(loadedModel.modelID);
+            loadedModel = null;
+          } catch (e) { /* ignore */ }
+        }
+
+        async function loadFromUrl(url) {
+          try {
+            await clearModel();
+            const model = await viewer.IFC.loadIfcUrl(url, { onProgress: () => {} });
+            loadedModel = model;
+            viewer.context.renderer.postproduction.active = true;
+            viewer.context.renderer.postproduction.bloomStrength = 0.15;
+            viewer.context.renderer.postproduction.bloomRadius = 0.5;
+            viewer.context.getScene().add(model.mesh);
+            viewer.fitToFrame();
+          } catch (err) {
+            console.error('Error loading IFC from URL:', err);
+            alert('Could not load IFC from URL. Check console for details.');
+          }
+        }
+
+        async function loadFromFile(file) {
+          try {
+            if (!file) return;
+            await clearModel();
+            const url = URL.createObjectURL(file);
+            const model = await viewer.IFC.loadIfcUrl(url);
+            loadedModel = model;
+            viewer.context.renderer.postproduction.active = true;
+            viewer.fitToFrame();
+            setTimeout(() => URL.revokeObjectURL(url), 2000);
+          } catch (err) {
+            console.error('Error loading local IFC:', err);
+            alert('Could not load local IFC. See console.');
+          }
+        }
+
+        fileInput.addEventListener('change', (ev) => {
+          const f = ev.target.files && ev.target.files[0];
+          if (f) loadFromFile(f);
+        });
+
+        loadUrlBtn.addEventListener('click', () => {
+          const u = (urlInput.value || '').trim();
+          if (!u) { alert('Paste an IFC file URL then press Load'); return; }
+          loadFromUrl(u);
+        });
+
+        fitBtn.addEventListener('click', () => { try { viewer.fitToFrame(); } catch(e){} });
+        wireBtn.addEventListener('click', () => {
+          edgesShown = !edgesShown;
+          if (!loadedModel) return;
+          if (edgesShown) viewer.edges.renderEdges(loadedModel.modelID);
+          else viewer.edges.removeAll();
+        });
+        bgBtn.addEventListener('click', () => {
+          darkBg = !darkBg;
+          const color = darkBg ? 0x101010 : 0xffffff;
+          viewer.context.getScene().background = new THREE.Color(color);
+        });
+
+        container.addEventListener('click', async (ev) => {
+          const result = await viewer.pickIfcItem({ mouse: ev, pickSurface: true });
+          if (result) {
+            const { modelID, id } = result;
+            viewer.IFC.loader.ifcManager.applyWebIfcConfig({ COORDINATE_TO_WORLD: true });
+            viewer.manager.clearAllHighlights && viewer.manager.clearAllHighlights();
+            viewer.createSubset({ modelID, ids: [id], removePrevious: true, material: { color: 0xff0000 } });
+          }
+        });
+
+        window.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape') {
+            viewer.clearAllHighlights && viewer.clearAllHighlights();
+            viewer.edges.removeAll && viewer.edges.removeAll();
+          }
+        });
+
+      }); // DOMContentLoaded
+    })();
+  </script>
+
+</body>
+</html>

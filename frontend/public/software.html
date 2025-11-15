@@ -1,0 +1,347 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Software — AQJ Group</title>
+
+  <link rel="icon" href="favicon.png" type="image/png">
+  <link rel="stylesheet" href="../css/styles.css" />
+  <meta name="description" content="Software ecosystem used by AQJ Group — Revit, Navisworks, AutoCAD, BIM 360, Twinmotion, V-Ray and more." />
+
+  <!-- Fonts for Arabic + English verse block -->
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --marquee-duration: 18s; /* change to adjust speed */
+    }
+
+    /* Top marquee (robust, uniform linear movement) */
+    .top-marquee {
+      width:100%;
+      height:56px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      overflow:hidden;
+      position:relative;
+      background: linear-gradient(90deg, rgba(8,8,8,0.72), rgba(12,12,12,0.55));
+      border-bottom:1px solid rgba(255,255,255,0.06);
+      padding:0 12px;
+      z-index:50;
+      box-sizing:border-box;
+      backdrop-filter: blur(4px);
+    }
+
+    .runner {
+      position:absolute;
+      top:50%;
+      left:0;
+      transform:translateY(-50%);
+      pointer-events:none;
+      white-space:nowrap;
+      animation: runnerTravel var(--marquee-duration) linear infinite;
+      will-change: transform, opacity;
+    }
+    .runner.runner-2 { animation-delay: calc(var(--marquee-duration) / -2); }
+
+    .marquee-pill {
+      display:inline-flex;
+      align-items:center;
+      gap:12px;
+      padding:8px 36px;
+      border-radius:999px;
+      background: rgba(255,255,255,0.04);
+      box-shadow: 0 6px 18px rgba(0,0,0,0.45) inset;
+      color:#fff;
+      font-family: "Amiri", serif;
+      font-weight:700;
+      font-size:1.08rem;
+      line-height:1;
+      text-align:center;
+      transform: translateZ(0);
+      opacity: 0;
+      animation: pillOpacity var(--marquee-duration) linear infinite;
+    }
+    .runner.runner-2 .marquee-pill { animation-delay: calc(var(--marquee-duration) / -2); }
+
+    .marquee-pill .trans {
+      font-family: "Poppins", sans-serif;
+      font-size:0.82rem;
+      color: rgba(255,255,255,0.92);
+      margin-left:12px;
+      white-space: nowrap;
+    }
+
+    /* uniform linear movement */
+    @keyframes runnerTravel {
+      0% { transform: translateX(calc(100vw)) translateY(-50%); }
+      100% { transform: translateX(calc(-100% - 100vw)) translateY(-50%); }
+    }
+
+    /* gentle fade in/out only */
+    @keyframes pillOpacity {
+      0% { opacity: 0; }
+      10% { opacity: 1; }
+      90% { opacity: 1; }
+      100% { opacity: 0; }
+    }
+
+    /* edge masks */
+    .top-marquee::before,
+    .top-marquee::after {
+      content:"";
+      position:absolute;
+      top:0; bottom:0; width:6%;
+      pointer-events:none; z-index:30;
+    }
+    .top-marquee::before { left:0; background: linear-gradient(to right, rgba(8,8,8,1), rgba(8,8,8,0)); }
+    .top-marquee::after  { right:0; background: linear-gradient(to left, rgba(8,8,8,1), rgba(8,8,8,0)); }
+
+    .top-marquee:hover .runner,
+    .top-marquee:hover .runner .marquee-pill { animation-play-state: paused; }
+
+    /* Featured verse block */
+    .verse-block {
+      max-width: 920px;
+      margin: 18px auto;
+      padding: 14px 18px;
+      border-radius: 12px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border: 1px solid rgba(255,255,255,0.03);
+      box-shadow: 0 6px 18px rgba(0,0,0,0.22);
+      color: var(--muted, #d6d6d6);
+      text-align: center;
+      position: relative;
+    }
+    .verse-block .arabic {
+      font-family: "Amiri", serif;
+      font-size: 1.45rem;
+      font-weight: 700;
+      color: #ffffff;
+      direction: rtl;
+      line-height: 1.25;
+      margin-bottom: 8px;
+      text-shadow: 0 1px 6px rgba(0,0,0,0.35);
+    }
+    .verse-block .translation {
+      font-family: "Poppins", sans-serif;
+      font-size: 1rem;
+      color: rgba(255,255,255,0.92);
+      margin-bottom: 8px;
+    }
+    .verse-block .caption {
+      font-family: "Poppins", sans-serif;
+      font-size: 0.94rem;
+      color: var(--muted, #cfcfcf);
+      margin-top: 6px;
+      font-weight: 300;
+    }
+
+    @media (max-width:900px) {
+      :root { --marquee-duration: 14s; }
+      .top-marquee { height:52px; }
+      .marquee-pill { padding:6px 18px; font-size:1rem; }
+      .marquee-pill .trans { font-size:0.75rem; margin-left:8px; }
+      .verse-block { margin:12px; padding:10px 12px; }
+      .verse-block .arabic { font-size:1.15rem; }
+      .verse-block .translation { font-size:0.95rem; }
+      .verse-block .caption { font-size:0.88rem; }
+    }
+  </style>
+</head>
+
+<body data-page="software">
+
+  <!-- Header (auto-injected) -->
+  <div id="header-placeholder"></div>
+
+  <!-- MOVING MARQUEE -->
+  <div class="top-marquee" role="region" aria-label="Scrolling Qur'anic verse">
+    <div class="runner runner-1" aria-hidden="true">
+      <div class="marquee-pill">
+        <span class="arabic" lang="ar">عَلَّمَ الْإِنسَانَ مَا لَمْ يَعْلَمْ</span>
+        <span class="trans">“He taught man that which he knew not.” — Surah Al-‘Alaq (96:5)</span>
+      </div>
+    </div>
+
+    <div class="runner runner-2" aria-hidden="true">
+      <div class="marquee-pill">
+        <span class="arabic" lang="ar">عَلَّمَ الْإِنسَانَ مَا لَمْ يَعْلَمْ</span>
+        <span class="trans">“He taught man that which he knew not.” — Surah Al-‘Alaq (96:5)</span>
+      </div>
+    </div>
+  </div>
+
+
+  <main class="container section" aria-label="Software & Tools" style="padding-top:36px;padding-bottom:40px;">
+
+    <!-- Page intro -->
+    <header style="margin-bottom:28px;text-align:center;">
+      <h1 style="margin:0 0 8px;">Software Ecosystem</h1>
+      <p style="color:var(--muted);max-width:900px;margin:0 auto;">
+        AQJ Group uses a curated software stack for modelling, coordination, simulation and delivery. We combine industry-standard platforms with automation tools to deliver accurate models, clash-free coordination and operationally-ready asset data.
+      </p>
+    </header>
+
+    <!-- Primary platforms -->
+    <section aria-label="Primary platforms" style="margin-bottom:36px;">
+      <h2 style="margin-bottom:12px;">Primary BIM & Coordination Platforms</h2>
+      <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px;">
+        <div class="card">
+          <h4 style="margin:0 0 8px;">Autodesk Revit</h4>
+          <p style="color:var(--muted);margin:0;">Our primary modelling tool for architectural, structural and MEP design. We author families, templates and perform LOD-based modelling in Revit.</p>
+        </div>
+
+        <div class="card">
+          <h4 style="margin:0 0 8px;">Navisworks Manage & Clash Detective</h4>
+          <p style="color:var(--muted);margin:0;">Federation, clash detection, model review and coordination workflows — Navisworks is used for multi-discipline coordination and issue tracking.</p>
+        </div>
+
+        <div class="card">
+          <h4 style="margin:0 0 8px;">Autodesk BIM 360 / Autodesk Construction Cloud</h4>
+          <p style="color:var(--muted);margin:0;">Document & model management, cloud-based coordination, markups and controlled collaboration across project teams.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Documentation & CAD -->
+    <section aria-label="Documentation and CAD" style="margin-bottom:36px;">
+      <h2 style="margin-bottom:12px;">Documentation & CAD</h2>
+      <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px;">
+        <div class="card">
+          <h4 style="margin:0 0 8px;">AutoCAD</h4>
+          <p style="color:var(--muted);margin:0;">Drawing production, 2D documentation and interoperability with older CAD workflows and consultants.</p>
+        </div>
+
+        <div class="card">
+          <h4 style="margin:0 0 8px;">Bluebeam Revu</h4>
+          <p style="color:var(--muted);margin:0;">PDF markup, QA/QC review, punchlists and digital collaboration for document-heavy workflows.</p>
+        </div>
+
+        <div class="card">
+          <h4 style="margin:0 0 8px;">Microsoft Office / Excel / Power BI</h4>
+          <p style="color:var(--muted);margin:0;">Project reporting, data analysis, and dashboards for handover and O&M teams (Power BI for dashboards).</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Visualization & rendering -->
+    <section aria-label="Visualization" style="margin-bottom:36px;">
+      <h2 style="margin-bottom:12px;">Visualization & Rendering</h2>
+      <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px;">
+        <div class="card">
+          <h4 style="margin:0 0 8px;">Twinmotion</h4>
+          <p style="color:var(--muted);margin:0;">Fast, real-time visualisation for client presentations, VR-ready exports and animation of construction sequences.</p>
+        </div>
+
+        <div class="card">
+          <h4 style="margin:0 0 8px;">V-Ray / Corona</h4>
+          <p style="color:var(--muted);margin:0;">Photoreal renders for high-fidelity imagery used in marketing and stakeholder sign-off packages.</p>
+        </div>
+
+        <div class="card">
+          <h4 style="margin:0 0 8px;">Unreal Engine / Datasmith</h4>
+          <p style="color:var(--muted);margin:0;">Real-time engines for immersive walkthroughs, complex visualization and advanced simulation use-cases.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Analysis, simulation & automation -->
+    <section aria-label="Analysis and automation" style="margin-bottom:36px;">
+      <h2 style="margin-bottom:12px;">Analysis, Simulation & Automation</h2>
+      <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px;">
+        <div class="card">
+          <h4 style="margin:0 0 8px;">Primavera P6 / Microsoft Project</h4>
+          <p style="color:var(--muted);margin:0;">Schedule integration for 4D simulations and construction sequencing analysis.</p>
+        </div>
+
+        <div class="card">
+          <h4 style="margin:0 0 8px;">Dynamo & Python</h4>
+          <p style="color:var(--muted);margin:0;">Parametric automation, batch processing and data extraction — Dynamo for Revit workflows and Python for data pipelines.</p>
+        </div>
+
+        <div class="card">
+          <h4 style="margin:0 0 8px;">BIM Query & Data Tools</h4>
+          <p style="color:var(--muted);margin:0;">Tools like Solibri, BIMcollab, and custom scripts for model checking, data validation and rule-based QA.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Cloud & integration -->
+    <section aria-label="Cloud and integration" style="margin-bottom:36px;">
+      <h2 style="margin-bottom:12px;">Cloud, CI & Integration</h2>
+      <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px;">
+        <div class="card">
+          <h4 style="margin:0 0 8px;">APIs & Integrations</h4>
+          <p style="color:var(--muted);margin:0;">Integration with BIM 360/ACC APIs, webhooks and scripted exports to connect models with FM and reporting systems.</p>
+        </div>
+
+        <div class="card">
+          <h4 style="margin:0 0 8px;">Docker / CI</h4>
+          <p style="color:var(--muted);margin:0;">Containerised processing pipelines for repeatable data transforms, CI for validation and automated exports.</p>
+        </div>
+
+        <div class="card">
+          <h4 style="margin:0 0 8px;">Cloud Platforms (Azure / AWS)</h4>
+          <p style="color:var(--muted);margin:0;">Cloud-hosted services for dashboards, storage and server-side model processing when needed.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Plugins & utilities -->
+    <section aria-label="Plugins and utilities" style="margin-bottom:36px;">
+      <h2 style="margin-bottom:12px;">Plugins, Utilities & File Formats</h2>
+      <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px;">
+        <div class="card">
+          <h4 style="margin:0 0 8px;">IFC / COBie / gbXML</h4>
+          <p style="color:var(--muted);margin:0;">Open exchange formats we validate and use for interoperability between platforms and for handover packages.</p>
+        </div>
+
+        <div class="card">
+          <h4 style="margin:0 0 8px;">Revit Add-ins & Utilities</h4>
+          <p style="color:var(--muted);margin:0;">Custom add-ins and community tools to speed modelling, naming and parameter management.</p>
+        </div>
+
+        <div class="card">
+          <h4 style="margin:0 0 8px;">Reporting & Dashboards</h4>
+          <p style="color:var(--muted);margin:0;">Power BI, custom web dashboards and automated exports for stakeholders and FM teams.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Training & licencing -->
+    <section aria-label="Licensing and training" style="margin-bottom:36px;">
+      <h2 style="margin-bottom:12px;">Licensing & Training Support</h2>
+      <div class="card" style="padding:18px;">
+        <p style="color:var(--muted);margin:0;">
+          We help clients select appropriate software licensing and deliver role-based training to ensure teams can use tools effectively. From admin & IT setup to hands-on user sessions, our training covers modelling best practices, coordination workflows and automation.
+        </p>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section aria-label="Contact CTA" style="margin-bottom:40px;">
+      <div class="card" style="padding:18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;">
+        <div>
+          <h3 style="margin:0 0 6px;">Need help selecting the right tools?</h3>
+          <p style="color:var(--muted);margin:0;">We can advise on toolsets, licensing, templates and integrations tailored to your project and organisation.</p>
+        </div>
+        <div style="margin-left:12px;">
+          <a class="btn primary" href="contact.html">Talk to an Expert</a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer (auto-injected) -->
+  <div id="footer-placeholder"></div>
+
+  <!-- Scripts -->
+  <script src="include-partials.js" defer></script>
+  <script src="../js/app.js" defer></script>
+
+</body>
+</html>
