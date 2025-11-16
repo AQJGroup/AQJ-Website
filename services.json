@@ -1,0 +1,10 @@
+﻿{
+  "list": [
+    {"title":"Architectural BIM","text":"Detailed architectural 3D modeling, documentation and visualization."},
+    {"title":"Structural BIM","text":"Structural modeling and analysis-ready data for engineers and fabricators."},
+    {"title":"MEP BIM","text":"Mechanical, Electrical and Plumbing coordination-ready models with systems hierarchies."},
+    {"title":"Scan-to-BIM","text":"Point-cloud processing and as-built model creation."},
+    {"title":"Clash Detection & Coordination","text":"Federate models and run clash tests, generate reports and track issues."},
+    {"title":"Digital Twins & Asset Intelligence","text":"Deliver asset registers, COBie-ready data and O&M packages for facilities management."}
+  ]
+}
