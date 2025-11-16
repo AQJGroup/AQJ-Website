@@ -1,0 +1,357 @@
+﻿/* frontend/css/styles.css
+   Cleaned & consistent version:
+   - working dark/light theme switch (supports html.light-theme / html.dark-theme)
+   - follows system preference when neither class is set
+   - single logo size variable (--logo-height)
+   - improved theme toggle button styles & accessibility
+   - defensive image rules & responsive tweaks preserved
+*/
+
+/* ---------- Theme variables (single source of truth) ---------- */
+:root {
+  --bg: #0f0f0f;
+  --surface: #121212;
+  --card: #0e0e0e;
+  --accent: #d6a21f;
+  --muted: #bdbdbd;
+  --text: #ffffff;
+  --container: 1200px;
+  --logo-height: 100px;
+  --header-bg: rgba(0,0,0,0.45);
+  --transition-speed: 200ms;
+  --shadow-strong: 0 8px 20px rgba(0,0,0,0.5);
+}
+
+/* If author explicitly sets a theme class on <html>, use those */
+html.dark-theme {
+  --bg: #0f0f0f;
+  --surface: #121212;
+  --card: #0e0e0e;
+  --accent: #d6a21f;
+  --muted: #bdbdbd;
+  --text: #ffffff;
+  --header-bg: rgba(0,0,0,0.45);
+}
+
+html.light-theme {
+  --bg: #ffffff;
+  --surface: #f7f7f7;
+  --card: #ffffff;
+  --accent: #d6a21f;
+  --muted: #555555;
+  --text: #111111;
+  --header-bg: rgba(255,255,255,0.9);
+}
+
+/* If neither class is present, follow system preference */
+@media (prefers-color-scheme: dark) {
+  html:not(.light-theme):not(.dark-theme) {
+    --bg: #0f0f0f;
+    --surface: #121212;
+    --card: #0e0e0e;
+    --accent: #d6a21f;
+    --muted: #bdbdbd;
+    --text: #ffffff;
+    --header-bg: rgba(0,0,0,0.45);
+  }
+}
+@media (prefers-color-scheme: light) {
+  html:not(.light-theme):not(.dark-theme) {
+    --bg: #ffffff;
+    --surface: #f7f7f7;
+    --card: #ffffff;
+    --accent: #d6a21f;
+    --muted: #555555;
+    --text: #111111;
+    --header-bg: rgba(255,255,255,0.9);
+  }
+}
+
+/* ---------- Reset / Base ---------- */
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background var(--transition-speed) ease, color var(--transition-speed) ease;
+}
+.container { max-width: var(--container); margin: 0 auto; padding: 40px; transition: color var(--transition-speed) ease, background var(--transition-speed) ease; }
+
+/* ---------- Defensive image rules ---------- */
+img {
+  max-width: 100%;
+  height: auto;
+  display: inline-block;
+  vertical-align: middle;
+  background: transparent;
+}
+
+/* Larger logo inside page content (optional) */
+.page-logo, .content-logo {
+  display: block;
+  max-width: 420px;
+  width: 60%;
+  height: auto;
+  margin: 18px auto;
+}
+
+/* ---------- Header / Nav / Hero ---------- */
+.brand img.logo,
+header .brand img.logo,
+.site-header .logo img {
+  height: var(--logo-height);
+  max-height: calc(var(--logo-height) * 1.3);
+  width: auto;
+  display: block;
+  object-fit: contain;
+}
+
+/* Header frame */
+.site-header {
+  background: var(--surface);
+  padding: 18px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  position: sticky;
+  top: 0;
+  z-index: 90;
+  backdrop-filter: saturate(120%) blur(4px);
+  transition: background var(--transition-speed) ease, border-color var(--transition-speed) ease;
+}
+.site-header .logo img { height: var(--logo-height); display: block; }
+
+/* Theme toggle button */
+#themeToggle {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 6px 10px;
+  border-radius: 8px;
+  color: var(--accent);
+  font-size: 18px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease, border-color 160ms ease, color 160ms ease;
+  line-height: 1;
+  min-width: 44px;
+  min-height: 36px;
+}
+#themeToggle:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+}
+#themeToggle:focus {
+  outline: 2px solid rgba(214,162,31,0.18);
+  outline-offset: 2px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+}
+
+/* Make icon color adapt per theme */
+html.light-theme #themeToggle {
+  border-color: rgba(0, 0, 0, 0.15);
+  color: #d6a21f;
+  background: rgba(0, 0, 0, 0.03);
+}
+html.dark-theme #themeToggle {
+  border-color: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.02);
+  color: var(--accent);
+}
+
+/* Respect aria-pressed for keyboard users */
+#themeToggle[aria-pressed="true"] {
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+}
+
+/* Small internal icon helper (if you use #themeIcon) */
+#themeIcon { line-height: 1; pointer-events: none; }
+
+/* Desktop nav layout */
+.nav {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  justify-content: flex-end;
+}
+.nav a {
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 600;
+  transition: color 0.18s ease, text-decoration 0.18s ease;
+}
+.nav a:hover, .nav a:focus {
+  color: var(--accent);
+  text-decoration: underline;
+}
+
+/* ---------- HERO SECTION (Full Screen Video) ---------- */
+.hero {
+  position: relative;
+  width: 100%;
+  height: 100vh; /* full viewport height */
+  overflow: hidden;
+  background: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text);
+}
+
+.hero-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+  opacity: 0.35; /* slightly darker for text readability */
+  filter: brightness(0.85) contrast(1.03) saturate(0.98);
+  transition: opacity 0.3s ease;
+}
+
+/* subtle gradient overlay to help text legibility */
+.hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.28) 0%, rgba(0,0,0,0.55) 100%);
+  z-index: 1;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  padding: 0 20px;
+  max-width: 960px;
+}
+
+.hero-content h1 {
+  font-size: 36px;
+  margin: 0 0 12px;
+  letter-spacing: 0.2px;
+  line-height: 1.05;
+}
+
+/* make hero paragraph readable and slightly muted */
+.hero-content p {
+  color: var(--muted);
+  margin: 0 0 20px;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.btn {
+  background: var(--accent);
+  color: #111;
+  padding: 10px 16px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: 700;
+  transition: transform 0.12s ease, opacity 0.12s ease;
+}
+.btn:hover { transform: scale(1.04); opacity: 0.95; }
+.btn.ghost {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--accent);
+}
+
+/* ---------- Sections ---------- */
+.intro, .software, .services { padding: 48px 0; }
+.site-footer {
+  padding: 32px 0;
+  text-align: center;
+  color: var(--muted);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  margin-top: 40px;
+  background: var(--surface);
+  transition: background var(--transition-speed) ease, color var(--transition-speed) ease;
+}
+
+/* ---------- Team grid ---------- */
+.team-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+  margin-top: 18px;
+}
+.team-card {
+  background: var(--card);
+  padding: 16px;
+  border-radius: 12px;
+  text-align: center;
+  box-shadow: var(--shadow-strong);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 250px;
+  transition: background var(--transition-speed) ease, color var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
+}
+.team-photo {
+  width: 120px;
+  height: 120px;
+  margin: 0 auto 12px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid rgba(255, 255, 255, 0.04);
+  background: rgba(255, 255, 255, 0.02);
+  flex: 0 0 auto;
+}
+.team-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.team-name {
+  margin: 8px 0 4px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text);
+}
+.team-role {
+  color: var(--muted);
+  font-size: 0.9rem;
+  margin-bottom: 8px;
+}
+.team-bio {
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.35;
+  margin-top: 6px;
+}
+.team-photo.rect {
+  width: 100%;
+  height: 180px;
+  border-radius: 8px;
+}
+
+/* ---------- Utilities ---------- */
+.hidden { display: none !important; }
+
+/* ---------- Responsive tweaks ---------- */
+@media (max-width: 900px) {
+  .hero { height: 70vh; } /* reduce height on smaller screens for better UX */
+  .hero-content h1 { font-size: 28px; }
+  .team-photo { width: 100px; height: 100px; }
+  .container { padding: 20px; }
+  .nav { gap: 12px; }
+}
+
+/* Protect against raw logo breaks */
+.logo-inline, .raw-logo {
+  max-width: 360px;
+  width: 45%;
+  height: auto;
+  display: block;
+  margin: 0 auto 18px;
+}
+
+/* End of file */

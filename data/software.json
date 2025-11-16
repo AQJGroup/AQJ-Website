@@ -1,0 +1,10 @@
+﻿{
+  "tools": [
+    { "name": "Revit", "desc": "Parametric modeling, LOD-based BIM deliverables, families and documentation." },
+    { "name": "Navisworks", "desc": "Federation, clash detection, sequencing and 4D analysis." },
+    { "name": "AutoCAD", "desc": "2D drafting, details, and base documentation for multidisciplinary coordination." },
+    { "name": "BIM 360", "desc": "Cloud collaboration, model sharing, and document control." },
+    { "name": "V-Ray", "desc": "High-quality rendering and visualization." },
+    { "name": "Twinmotion", "desc": "Real-time visualization and immersive walkthroughs." }
+  ]
+}

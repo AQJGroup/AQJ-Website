@@ -1,0 +1,331 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Contact — AQJ Group</title>
+
+  <link rel="icon" href="favicon.png" type="image/png">
+  <link rel="stylesheet" href="../css/styles.css" />
+  <meta name="description" content="Contact AQJ Group — BIM, model coordination, digital twin and construction technology." />
+
+  <!-- Fonts for Arabic + English verse block -->
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+  <!-- Organization JSON-LD -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "AQJ Group",
+    "url": "https://www.aqjgroup.com",
+    "logo": "https://www.aqjgroup.com/favicon.png",
+    "sameAs": [
+      "https://www.linkedin.com/company/aqjgroup",
+      "https://www.instagram.com/aqj_group"
+    ],
+    "contactPoint": [
+      {
+        "@type": "ContactPoint",
+        "telephone": "+91 7506482601",
+        "contactType": "customer service",
+        "areaServed": "IN",
+        "availableLanguage": ["English"]
+      }
+    ]
+  }
+  </script>
+
+  <style>
+    /* small page tweaks (keeps global styles) */
+    .contact-grid { display: grid; grid-template-columns: 1fr 420px; gap: 32px; align-items:start; }
+    .contact-card { background: var(--card); padding: 20px; border-radius: 10px; box-shadow: 0 8px 20px rgba(0,0,0,0.35); }
+    .contact-form input, .contact-form textarea, .contact-form button { font-family: inherit; }
+    .contact-form input, .contact-form textarea { width:100%; padding:10px 12px; border-radius:6px; border:1px solid rgba(255,255,255,0.06); background: transparent; color: var(--text); margin-bottom:10px; }
+    .contact-form textarea { min-height:120px; resize:vertical; }
+    .contact-meta { color: var(--muted); font-size:0.95rem; line-height:1.6; }
+    .map-embed { width:100%; height:240px; border-radius:8px; overflow:hidden; }
+    @media (max-width:900px){ .contact-grid { grid-template-columns: 1fr; } .map-embed{height:200px} }
+
+    /* Contact page social icons (only on contact page) */
+    .contact-social {
+      display: flex;
+      gap: 14px;
+      margin-top: 14px;
+      align-items: center;
+    }
+    .contact-social a {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width:44px;
+      height:44px;
+      border-radius:50%;
+      border:1px solid rgba(255,255,255,0.08);
+      color:var(--muted);
+      background:var(--surface);
+      text-decoration:none;
+      transition: all 0.18s ease;
+    }
+    html.light-theme .contact-social a {
+      border:1px solid rgba(0,0,0,0.08);
+      color:#333;
+      background: rgba(0,0,0,0.03);
+    }
+    .contact-social a:hover, .contact-social a:focus {
+      transform: translateY(-4px);
+      color: var(--accent);
+      border-color: var(--accent);
+      box-shadow: 0 6px 18px rgba(214,162,31,0.18);
+    }
+    .contact-social svg { width:20px; height:20px; display:block; }
+    .contact-social .sr { position: absolute !important; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+
+    /* ===== Marquee & verse styles (same robust version used across site) ===== */
+    :root { --marquee-duration: 18s; }
+
+    .top-marquee {
+      width:100%;
+      height:56px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      overflow:hidden;
+      position:relative;
+      background: linear-gradient(90deg, rgba(8,8,8,0.72), rgba(12,12,12,0.55));
+      border-bottom:1px solid rgba(255,255,255,0.06);
+      padding:0 12px;
+      z-index:50;
+      box-sizing:border-box;
+      backdrop-filter: blur(4px);
+      margin-bottom: 12px;
+    }
+
+    .runner {
+      position:absolute;
+      top:50%;
+      left:0;
+      transform:translateY(-50%);
+      pointer-events:none;
+      white-space:nowrap;
+      animation: runnerTravel var(--marquee-duration) linear infinite;
+      will-change: transform, opacity;
+    }
+    .runner.runner-2 { animation-delay: calc(var(--marquee-duration) / -2); }
+
+    .marquee-pill {
+      display:inline-flex;
+      align-items:center;
+      gap:12px;
+      padding:8px 36px;
+      border-radius:999px;
+      background: rgba(255,255,255,0.04);
+      box-shadow: 0 6px 18px rgba(0,0,0,0.45) inset;
+      color:#fff;
+      font-family: "Amiri", serif;
+      font-weight:700;
+      font-size:1.08rem;
+      line-height:1;
+      text-align:center;
+      transform: translateZ(0);
+      opacity: 0;
+      animation: pillOpacity var(--marquee-duration) linear infinite;
+    }
+    .runner.runner-2 .marquee-pill { animation-delay: calc(var(--marquee-duration) / -2); }
+
+    .marquee-pill .trans {
+      font-family: "Poppins", sans-serif;
+      font-size:0.82rem;
+      color: rgba(255,255,255,0.92);
+      margin-left:12px;
+      white-space: nowrap;
+    }
+
+    @keyframes runnerTravel {
+      0% { transform: translateX(calc(100vw)) translateY(-50%); }
+      100% { transform: translateX(calc(-100% - 100vw)) translateY(-50%); }
+    }
+
+    @keyframes pillOpacity {
+      0% { opacity: 0; }
+      10% { opacity: 1; }
+      90% { opacity: 1; }
+      100% { opacity: 0; }
+    }
+
+    .top-marquee::before,
+    .top-marquee::after {
+      content:"";
+      position:absolute;
+      top:0; bottom:0; width:6%;
+      pointer-events:none; z-index:30;
+    }
+    .top-marquee::before { left:0; background: linear-gradient(to right, rgba(8,8,8,1), rgba(8,8,8,0)); }
+    .top-marquee::after  { right:0; background: linear-gradient(to left, rgba(8,8,8,1), rgba(8,8,8,0)); }
+
+    .top-marquee:hover .runner,
+    .top-marquee:hover .runner .marquee-pill { animation-play-state: paused; }
+
+    /* Featured verse block */
+    .verse-block {
+      max-width: 920px;
+      margin: 6px auto 18px;
+      padding: 14px 18px;
+      border-radius: 12px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border: 1px solid rgba(255,255,255,0.03);
+      box-shadow: 0 6px 18px rgba(0,0,0,0.22);
+      color: var(--muted, #d6d6d6);
+      text-align: center;
+      position: relative;
+    }
+    .verse-block .arabic {
+      font-family: "Amiri", serif;
+      font-size: 1.45rem;
+      font-weight: 700;
+      color: #ffffff;
+      direction: rtl;
+      line-height: 1.25;
+      margin-bottom: 8px;
+      text-shadow: 0 1px 6px rgba(0,0,0,0.35);
+    }
+    .verse-block .translation {
+      font-family: "Poppins", sans-serif;
+      font-size: 1rem;
+      color: rgba(255,255,255,0.92);
+      margin-bottom: 8px;
+    }
+    .verse-block .caption {
+      font-family: "Poppins", sans-serif;
+      font-size: 0.94rem;
+      color: var(--muted, #cfcfcf);
+      margin-top: 6px;
+      font-weight: 300;
+    }
+
+    @media (max-width:900px) {
+      :root { --marquee-duration: 14s; }
+      .top-marquee { height:52px; }
+      .marquee-pill { padding:6px 18px; font-size:1rem; }
+      .marquee-pill .trans { font-size:0.75rem; margin-left:8px; }
+      .verse-block { margin:12px; padding:10px 12px; }
+      .verse-block .arabic { font-size:1.15rem; }
+      .verse-block .translation { font-size:0.95rem; }
+      .verse-block .caption { font-size:0.88rem; }
+    }
+  </style>
+</head>
+
+<body data-page="contact">
+  <div id="header-placeholder"></div>
+
+  <!-- MOVING MARQUEE -->
+  <div class="top-marquee" role="region" aria-label="Scrolling Qur'anic verse">
+    <div class="runner runner-1" aria-hidden="true">
+      <div class="marquee-pill">
+        <span class="arabic" lang="ar">وَشَاوِرْهُمْ فِي الْأَمْرِ ۖ فَإِذَا عَزَمْتَ فَتَوَكَّلْ عَلَى اللَّهِ</span>
+        <span class="trans">“And consult them in matters. Then when you have taken a decision, put your trust in Allah.” — Surah Aal-Imran (3:159)</span>
+      </div>
+    </div>
+
+    <div class="runner runner-2" aria-hidden="true">
+      <div class="marquee-pill">
+        <span class="arabic" lang="ar">وَشَاوِرْهُمْ فِي الْأَمْرِ ۖ فَإِذَا عَزَمْتَ فَتَوَكَّلْ عَلَى اللَّهِ</span>
+        <span class="trans">“And consult them in matters. Then when you have taken a decision, put your trust in Allah.” — Surah Aal-Imran (3:159)</span>
+      </div>
+    </div>
+  </div>
+
+
+  <main class="container section" style="padding-top:36px;padding-bottom:40px;">
+    <h1 style="margin-bottom:18px;">Contact Us</h1>
+    <p style="color:var(--muted);max-width:900px;margin-bottom:18px;">
+      AQJ Group is a multidisciplinary digital construction and BIM consultancy. Tell us about your project and timelines — we’ll respond with a clear, data-first plan.
+    </p>
+
+    <div class="contact-grid">
+      <!-- left: form -->
+      <div class="contact-card">
+        <form id="contactForm" class="contact-form" aria-label="Contact form">
+          <input type="text" name="name" placeholder="Your name" aria-label="Your name" required>
+          <input type="email" name="email" placeholder="Your email" aria-label="Your email" required>
+          <textarea name="message" placeholder="Your message" aria-label="Your message" required></textarea>
+          <div style="display:flex;gap:12px;align-items:center;">
+            <button type="submit" class="btn" style="background:var(--accent);color:#111;padding:10px 14px;border-radius:6px;">Send Message</button>
+            <div id="formMessage" style="color:var(--muted);font-size:0.95rem;"></div>
+          </div>
+
+          <div style="margin-top:12px;color:var(--muted);font-size:0.85rem;">
+            By sending this message you agree that AQJ Group may contact you about your enquiry. We will not share your details.
+          </div>
+        </form>
+      </div>
+
+      <!-- right: contact details & map -->
+      <aside>
+        <div class="contact-card contact-meta">
+          <strong>Email:</strong> <a href="mailto:contact@aqjgroup.in">contact@aqjgroup.in</a><br/>
+          <strong>Phone:</strong> <a href="tel:+917506482601">+91 750 648 2601</a><br/>
+          <strong>Address:</strong> Mumbai, India<br/>
+          <strong>Business hours:</strong> Mon–Fri 09:30–18:30 IST<br/>
+
+          <!-- Social icons (only on contact page) -->
+          <div class="contact-social" aria-hidden="false">
+            <!-- LinkedIn (opens same tab) -->
+            <a href="https://www.linkedin.com/company/aqjgroup" aria-label="AQJ Group on LinkedIn">
+              <span class="sr">LinkedIn</span>
+              <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" role="img" aria-hidden="true">
+                <path d="M4.98 3.5C4.98 4.88 3.87 6 2.5 6S0 4.88 0 3.5 1.11 1 2.5 1 4.98 2.12 4.98 3.5zM0 24h5V7H0v17zM8 7v17h5v-9.6c0-5.3 6-5.7 6 0V24h5V14.2C24 6.2 17 5 15 5c-3.1 0-6 1.4-7.5 3.6V7H8z"/>
+              </svg>
+            </a>
+
+            <!-- Instagram (opens same tab) -->
+            <a href="https://www.instagram.com/aqj_group" aria-label="AQJ Group on Instagram">
+              <span class="sr">Instagram</span>
+              <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" role="img" aria-hidden="true">
+                <path d="M12 2.2c3.2 0 3.6 0 4.9.1 1.2.1 1.9.3 2.4.5.6.2 1 .5 1.4.9.4.4.7.8.9 1.4.2.5.4 1.2.5 2.4.1 1.3.1 1.7.1 4.9s0 3.6-.1 4.9c-.1 1.2-.3 1.9-.5 2.4-.2.6-.5 1-1 1.4-.4.4-.8.7-1.4.9-.5.2-1.2.4-2.4.5-1.3.1-1.7.1-4.9.1s-3.6 0-4.9-.1c-1.2-.1-1.9-.3-2.4-.5-.6-.2-1-.5-1.4-.9-.4-.4-.7-.8-.9-1.4-.2-.5-.4-1.2-.5-2.4C2.2 15.6 2.2 15.2 2.2 12s0-3.6.1-4.9c.1-1.2.3-1.9.5-2.4.2-.6.5-1 1-1.4.4-.4.8-.7 1.4-.9.5-.2 1.2-.4 2.4-.5C8.4 2.2 8.8 2.2 12 2.2zm0 1.8c-3 0-3.4 0-4.6.1-1 .1-1.5.2-1.9.4-.5.2-.9.4-1.3.8-.4.4-.6.8-.8 1.3-.2.4-.3.9-.4 1.9-.1 1.2-.1 1.6-.1 4.6s0 3.4.1 4.6c.1 1 .2 1.5.4 1.9.2.5.4.9.8 1.3.4.4.8.6 1.3.8.4.2.9.3 1.9.4 1.2.1 1.6.1 4.6.1s3.4 0 4.6-.1c1-.1 1.5-.2 1.9-.4.5-.2.9-.4 1.3-.8.4-.4.6-.8.8-1.3.2-.4.3-.9.4-1.9.1-1.2.1-1.6.1-4.6s0-3.4-.1-4.6c-.1-1-.2-1.5-.4-1.9-.2-.5-.4-.9-.8-1.3-.4-.4-.8-.6-1.3-.8-.4-.2-.9-.3-1.9-.4-1.2-.1-1.6-.1-4.6-.1zM12 6.4a5.6 5.6 0 100 11.2 5.6 5.6 0 000-11.2zm0 9.2a3.6 3.6 0 110-7.2 3.6 3.6 0 010 7.2zM18.4 5a1.3 1.3 0 11-2.6 0 1.3 1.3 0 012.6 0z"/>
+              </svg>
+            </a>
+
+            <!-- Email (opens default mail client in same tab) -->
+            <a href="mailto:contact@aqjgroup.in" aria-label="Email AQJ Group">
+              <span class="sr">Email</span>
+              <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" role="img" aria-hidden="true">
+                <path d="M2 4h20v16H2z" fill="currentColor" opacity="0.06"/>
+                <path d="M20 6H4v12h16V6zM4 6l8 6 8-6" stroke="currentColor" stroke-width="1.2" fill="none"/>
+              </svg>
+            </a>
+          </div>
+
+          <div style="margin-top:16px;">
+            <strong>Other contact</strong>
+            <div style="color:var(--muted);margin-top:8px;">
+              Project enquiries: <a href="mailto:projects@aqjgroup.in">projects@aqjgroup.in</a><br/>
+              Careers: <a href="mailto:careers@aqjgroup.in">careers@aqjgroup.in</a>
+            </div>
+          </div>
+        </div>
+
+        <div style="height:16px"></div>
+
+        <div class="contact-card">
+          <div style="font-weight:700;margin-bottom:8px;">Find us</div>
+          <!-- Replace src with your actual Google Maps embed URL -->
+          <div class="map-embed">
+            <iframe
+              src="https://www.google.com/maps/embed?pb=YOUR_GOOGLE_MAPS_EMBED_URL_HERE"
+              style="border:0;width:100%;height:100%;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <div id="footer-placeholder"></div>
+
+  <!-- include partials first -->
+  <script src="include-partials.js" defer></script>
+  <!-- your site app.js handles contact form submit -->
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

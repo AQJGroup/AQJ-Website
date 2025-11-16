@@ -1,0 +1,203 @@
+﻿<style>
+  /* Header layout & compacting */
+  .navbar {
+    position: sticky;
+    top: 0;
+    z-index: 9999;
+    background: rgba(11,11,11,0.92);
+    backdrop-filter: blur(4px);
+    transition: padding 220ms ease, box-shadow 260ms ease, background 260ms ease;
+    padding: 14px 0; /* default larger padding */
+  }
+  .nav-inner {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    justify-content: space-between;
+  }
+
+  /* Brand / logo */
+  .brand { display:flex; align-items:center; gap:12px; text-decoration:none; }
+  .brand .logo, .logo { height: 72px; width: auto; display:block; transition: height 220ms ease; }
+
+  /* Navigation */
+  .nav {
+    display: flex;
+    gap: 18px;
+    align-items: center;
+  }
+  .nav a {
+    color: #eee;
+    text-decoration: none;
+    font-weight: 600;
+    padding: 6px 8px;
+    border-radius: 6px;
+    transition: transform 180ms ease, color 180ms ease, background 180ms ease;
+  }
+  .nav a:hover, .nav a:focus {
+    transform: translateY(-2px);
+    color: var(--accent, #f0b429);
+    outline: none;
+  }
+  .nav a[aria-current="page"] {
+    color: var(--accent, #f0b429);
+  }
+
+  /* Mobile menu button */
+  .mobile-menu-btn {
+    display: none;
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.06);
+    color: #fff;
+    padding: 8px 10px;
+    font-size: 18px;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+
+  /* Shrinked header when scrolled */
+  .navbar.scrolled {
+    padding: 8px 0;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.45);
+  }
+  .navbar.scrolled .brand .logo,
+  .navbar.scrolled .logo {
+    height: 48px;
+  }
+
+  /* Mobile: collapse nav into vertical drawer */
+  @media (max-width: 900px) {
+    .mobile-menu-btn { display: inline-flex; align-items:center; gap:8px; }
+    .nav {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 100%;
+      background: rgba(10,10,10,0.98);
+      flex-direction: column;
+      gap: 0;
+      padding: 12px;
+      transform-origin: top;
+      transform: scaleY(0);
+      opacity: 0;
+      pointer-events: none;
+      transition: transform 220ms ease, opacity 200ms ease;
+      border-bottom: 1px solid rgba(255,255,255,0.03);
+    }
+    .nav a { display: block; padding: 12px 16px; border-radius: 6px; }
+    /* When navbar has .open -> show menu */
+    .navbar.open .nav {
+      transform: scaleY(1);
+      opacity: 1;
+      pointer-events: auto;
+    }
+  }
+</style>
+
+<header class="navbar" role="banner">
+  <div class="container nav-inner">
+    <a class="brand" href="index.html" aria-label="AQJ Group — home">
+      <img src="../assets/images/logo-dark.png" alt="AQJ Group" class="logo" id="siteLogo"/>
+    </a>
+
+    <nav class="nav" aria-label="Main navigation" id="mainNav">
+      <a href="index.html">Home</a>
+      <a href="about.html">About</a>
+      <a href="services.html">Services</a>
+      <a href="software.html">Software</a>
+      <a href="projects.html">Projects</a>
+      <a href="team.html">Team</a>
+      <a href="contact.html">Contact</a>
+    </nav>
+
+    <button id="mobileMenuBtn" class="mobile-menu-btn" aria-label="Open menu" aria-expanded="false">
+      ☰
+    </button>
+  </div>
+</header>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    const navbar = document.querySelector('.navbar');
+    const logo = document.getElementById("siteLogo");
+    const mobileBtn = document.getElementById("mobileMenuBtn");
+    const mainNav = document.getElementById("mainNav");
+    const MOBILE_BREAK = 900;
+
+    /* 1) Logo theme switch (keeps your original logic) */
+    if (logo) {
+      function updateLogo() {
+        const isLight = document.documentElement.classList.contains("light-theme");
+        logo.src = isLight ? "../assets/images/logo-light.png" : "../assets/images/logo-dark.png";
+      }
+      updateLogo();
+      const observer = new MutationObserver(updateLogo);
+      observer.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
+    }
+
+    /* 2) Shrink header on scroll */
+    (function setupScrollShrink() {
+      if (!navbar) return;
+      const threshold = 60;
+      function onScroll() {
+        if (window.scrollY > threshold) navbar.classList.add('scrolled');
+        else navbar.classList.remove('scrolled');
+      }
+      window.addEventListener('scroll', onScroll, { passive: true });
+      onScroll();
+    })();
+
+    /* 3) Mobile menu toggle */
+    function closeMobileMenu() {
+      navbar.classList.remove('open');
+      mobileBtn.setAttribute('aria-expanded', 'false');
+      mobileBtn.textContent = '☰';
+    }
+    function openMobileMenu() {
+      navbar.classList.add('open');
+      mobileBtn.setAttribute('aria-expanded', 'true');
+      mobileBtn.textContent = '✕';
+    }
+
+    if (mobileBtn) {
+      mobileBtn.addEventListener('click', () => {
+        const expanded = mobileBtn.getAttribute('aria-expanded') === 'true';
+        if (expanded) closeMobileMenu();
+        else openMobileMenu();
+      });
+    }
+
+    /* Close menu when pressing ESC */
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeMobileMenu();
+    });
+
+    /* Close mobile menu on resize > breakpoint */
+    window.addEventListener('resize', () => {
+      if (window.innerWidth > MOBILE_BREAK) closeMobileMenu();
+    });
+
+    /* 4) Set aria-current on the active nav link (exact match) */
+    (function markActiveLink() {
+      try {
+        const loc = window.location.pathname.split('/').pop() || 'index.html';
+        const links = mainNav ? Array.from(mainNav.querySelectorAll('a')) : [];
+        links.forEach(a => {
+          const href = a.getAttribute('href') || '';
+          if (href === loc || (href === 'index.html' && loc === '')) {
+            a.setAttribute('aria-current','page');
+          } else {
+            a.removeAttribute('aria-current');
+          }
+        });
+      } catch (err) { /* ignore */ }
+    })();
+
+    /* 5) Click outside nav to close mobile menu (helpful UX) */
+    document.addEventListener('click', (ev) => {
+      if (!navbar.classList.contains('open')) return;
+      const isInside = navbar.contains(ev.target);
+      if (!isInside) closeMobileMenu();
+    }, true);
+  });
+</script>
