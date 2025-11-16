@@ -1,13 +1,14 @@
 ﻿<style>
-  /* Header layout & compacting */
+  /* Header layout & compacting (enhanced for theme switching) */
   .navbar {
     position: sticky;
     top: 0;
     z-index: 9999;
     background: rgba(11,11,11,0.92);
     backdrop-filter: blur(4px);
-    transition: padding 220ms ease, box-shadow 260ms ease, background 260ms ease;
+    transition: padding 220ms ease, box-shadow 260ms ease, background 260ms ease, color 200ms ease;
     padding: 14px 0; /* default larger padding */
+    color: #eee;
   }
   .nav-inner {
     display: flex;
@@ -17,8 +18,8 @@
   }
 
   /* Brand / logo */
-  .brand { display:flex; align-items:center; gap:12px; text-decoration:none; }
-  .brand .logo, .logo { height: 72px; width: auto; display:block; transition: height 220ms ease; }
+  .brand { display:flex; align-items:center; gap:12px; text-decoration:none; color:inherit; }
+  .brand .logo, .logo { height: 72px; width: auto; display:block; transition: height 220ms ease, filter 160ms ease, opacity 160ms ease; }
 
   /* Navigation */
   .nav {
@@ -92,11 +93,80 @@
       pointer-events: auto;
     }
   }
+
+  /* ---------------- Light-theme overrides ----------------
+     These selectors target light theme when set on <html> OR <body>,
+     either by class (light | light-theme) or by data-theme="light".
+  */
+  html.light-theme .navbar,
+  html.light .navbar,
+  html[data-theme="light"] .navbar,
+  body.light-theme .navbar,
+  body.light .navbar,
+  body[data-theme="light"] .navbar {
+    background: #ffffff;
+    color: #111;
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+    backdrop-filter: none;
+    box-shadow: none;
+  }
+
+  /* ensure header children inherit correct color in light theme */
+  html.light-theme .navbar *,
+  html.light .navbar *,
+  html[data-theme="light"] .navbar *,
+  body.light-theme .navbar *,
+  body.light .navbar *,
+  body[data-theme="light"] .navbar * {
+    color: inherit;
+  }
+
+  /* nav link coloring for light theme */
+  html.light-theme .navbar .nav a,
+  html.light .navbar .nav a,
+  html[data-theme="light"] .navbar .nav a,
+  body.light-theme .navbar .nav a,
+  body.light .navbar .nav a,
+  body[data-theme="light"] .navbar .nav a {
+    color: #444;
+  }
+  html.light-theme .navbar .nav a:hover,
+  html.light .navbar .nav a:hover,
+  html[data-theme="light"] .navbar .nav a:hover,
+  body.light-theme .navbar .nav a:hover,
+  body.light .navbar .nav a:hover,
+  body[data-theme="light"] .navbar .nav a:hover {
+    color: var(--accent, #d6a21f);
+  }
+
+  /* mobile button style in light */
+  html.light-theme .mobile-menu-btn,
+  html.light .mobile-menu-btn,
+  html[data-theme="light"] .mobile-menu-btn,
+  body.light-theme .mobile-menu-btn,
+  body.light .mobile-menu-btn,
+  body[data-theme="light"] .mobile-menu-btn {
+    border-color: rgba(0,0,0,0.08);
+    color: #111;
+    background: rgba(0,0,0,0.03);
+  }
+
+  /* ensure logo is visible on light background (remove filters if any) */
+  html.light-theme .logo,
+  html.light .logo,
+  html[data-theme="light"] .logo,
+  body.light-theme .logo,
+  body.light .logo,
+  body[data-theme="light"] .logo {
+    filter: none;
+    opacity: 1;
+  }
 </style>
 
 <header class="navbar" role="banner">
   <div class="container nav-inner">
     <a class="brand" href="index.html" aria-label="AQJ Group — home">
+      <!-- default src is dark logo (for dark theme). JS will swap to logo-light when needed -->
       <img src="../assets/images/logo-dark.png" alt="AQJ Group" class="logo" id="siteLogo"/>
     </a>
 
@@ -124,15 +194,50 @@
     const mainNav = document.getElementById("mainNav");
     const MOBILE_BREAK = 900;
 
-    /* 1) Logo theme switch (keeps your original logic) */
+    /* utility: check if site is currently in light theme
+       covers:
+        - <html class="light" | class="light-theme">
+        - <html data-theme="light">
+        - <body class="light" | class="light-theme">
+        - <body data-theme="light">
+    */
+    function isLightThemeActive() {
+      const el = document.documentElement;
+      const b = document.body;
+      return (
+        el.classList.contains('light') ||
+        el.classList.contains('light-theme') ||
+        el.getAttribute('data-theme') === 'light' ||
+        b.classList.contains('light') ||
+        b.classList.contains('light-theme') ||
+        b.getAttribute('data-theme') === 'light'
+      );
+    }
+
+    /* 1) Logo theme switch (keeps your original logic but more robust) */
     if (logo) {
       function updateLogo() {
-        const isLight = document.documentElement.classList.contains("light-theme");
-        logo.src = isLight ? "../assets/images/logo-light.png" : "../assets/images/logo-dark.png";
+        const isLight = isLightThemeActive();
+        // Path to your light/dark logo files (adjust if your filenames differ)
+        const lightSrc = "../assets/images/logo-light.png";
+        const darkSrc = "../assets/images/logo-dark.png";
+        // Only change if src is different to avoid unnecessary reload
+        const desired = isLight ? lightSrc : darkSrc;
+        if (logo.src && !logo.src.endsWith(desired.split('/').pop())) {
+          logo.src = desired;
+        } else if (!logo.src) {
+          logo.src = desired;
+        }
+        // ensure logo visible
+        logo.style.filter = 'none';
+        logo.style.opacity = '1';
       }
+      // run initially
       updateLogo();
-      const observer = new MutationObserver(updateLogo);
-      observer.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
+      // observe theme changes on html/body attributes/classes
+      const themeObserver = new MutationObserver(updateLogo);
+      themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class','data-theme'] });
+      themeObserver.observe(document.body, { attributes: true, attributeFilter: ['class','data-theme'] });
     }
 
     /* 2) Shrink header on scroll */

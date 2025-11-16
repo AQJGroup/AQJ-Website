@@ -29,6 +29,7 @@
       --gap: 26px;      /* gap between runs */
     }
 
+    /* Top marquee base (dark default) */
     .top-marquee {
       width:100%;
       height:56px;
@@ -40,11 +41,19 @@
       background: linear-gradient(90deg, rgba(8,8,8,0.72), rgba(12,12,12,0.55));
       border-bottom:1px solid rgba(255,255,255,0.06);
       padding:0 12px;
-      z-index:50;
+      z-index:105; /* placed above header (header uses z-index:90) */
       box-sizing:border-box;
       backdrop-filter: blur(4px);
-      /* moved up slightly so it fills the blank space under the header */
       margin-top: -14px; /* small negative offset to pull the bar upward */
+      pointer-events: none; /* allow clicks to pass through except on pills */
+    }
+
+    /* Make marquee theme-aware for light mode */
+    html[data-theme="light"] .top-marquee,
+    html.light .top-marquee,
+    html.light-theme .top-marquee {
+      background: linear-gradient(90deg, rgba(255,255,255,0.95), rgba(250,250,250,0.9));
+      border-bottom:1px solid rgba(0,0,0,0.06);
     }
 
     /* runner wrapper: absolute so items can travel full width */
@@ -69,6 +78,7 @@
       gap:12px;
       padding:8px 36px;
       border-radius:999px;
+      /* default dark-style pill, light-mode override below */
       background: rgba(255,255,255,0.04);
       box-shadow: 0 6px 18px rgba(0,0,0,0.45) inset;
       color:#fff;
@@ -79,7 +89,17 @@
       text-align:center;
       transform: translateZ(0); /* force GPU layer for smoothness */
       will-change: transform, opacity;
-      opacity: 0; /* will fade in as it enters */
+      opacity: 1; /* ensure visible */
+      pointer-events: auto; /* allow interacting with pill if needed */
+    }
+
+    /* Light-theme pill override */
+    html[data-theme="light"] .marquee-pill,
+    html.light .marquee-pill,
+    html.light-theme .marquee-pill {
+      background: rgba(0,0,0,0.06);
+      box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+      color: #111;
     }
 
     .marquee-pill .trans {
@@ -88,6 +108,13 @@
       color: rgba(255,255,255,0.92);
       margin-left:12px;
       white-space: nowrap;
+    }
+
+    /* make translation text darker in light theme */
+    html[data-theme="light"] .marquee-pill .trans,
+    html.light .marquee-pill .trans,
+    html.light-theme .marquee-pill .trans {
+      color: rgba(0,0,0,0.7);
     }
 
     /* UNIFORM MOVEMENT: constant linear speed from off-right -> off-left */
@@ -121,10 +148,20 @@
       content: "";
       position: absolute;
       top: 0; bottom: 0; width: 6%;
-      pointer-events: none; z-index: 30;
+      pointer-events: none; z-index: 110;
     }
     .top-marquee::before { left: 0; background: linear-gradient(to right, rgba(8,8,8,1), rgba(8,8,8,0)); }
     .top-marquee::after  { right:0; background: linear-gradient(to left, rgba(8,8,8,1), rgba(8,8,8,0)); }
+
+    /* light-mode masks */
+    html[data-theme="light"] .top-marquee::before,
+    html[data-theme="light"] .top-marquee::after,
+    html.light .top-marquee::before,
+    html.light .top-marquee::after,
+    html.light-theme .top-marquee::before,
+    html.light-theme .top-marquee::after {
+      background: linear-gradient(to right, rgba(255,255,255,0.95), rgba(255,255,255,0));
+    }
 
     /* pause on hover for readability */
     .top-marquee:hover .runner,
@@ -185,6 +222,7 @@
       align-items: center;
       justify-content: center;
       position: relative;
+      z-index: 100; /* ensure header sits beneath marquee (marquee z-index is 105) */
     }
     /* ensure brand (logo) and nav sit centered */
     .site-header .brand,
@@ -545,6 +583,90 @@
       }); // DOMContentLoaded
     })();
   </script>
+
+  <!-- START: Automatic theme toggle script (do not remove) -->
+  <script>
+  (function(){
+    // Key used to store user preference. If null → follow system preference (auto).
+    const STORAGE_KEY = 'aqj_theme_pref';
+
+    // Apply theme: set data-theme and several class names for compatibility
+    function applyTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      // remove any old theme classes
+      document.documentElement.classList.remove('dark', 'light', 'dark-theme', 'light-theme');
+      if (theme === 'dark') {
+        document.documentElement.classList.add('dark', 'dark-theme');
+      } else {
+        document.documentElement.classList.add('light', 'light-theme');
+      }
+    }
+
+    // Read saved preference (if any). Valid values: "dark", "light", or null (auto).
+    const saved = (function(){
+      try { return localStorage.getItem(STORAGE_KEY); } catch(e) { return null; }
+    })();
+
+    // System preference media query
+    const mq = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)');
+
+    // Decide initial theme: saved → use saved; otherwise follow system
+    const initial = saved === 'dark' || saved === 'light' ? saved : (mq && mq.matches ? 'dark' : 'light');
+    applyTheme(initial);
+
+    // If user has no saved preference, listen to system preference changes and update automatically.
+    if (!saved && mq && typeof mq.addEventListener === 'function') {
+      mq.addEventListener('change', (e) => {
+        applyTheme(e.matches ? 'dark' : 'light');
+      });
+    } else if (!saved && mq && typeof mq.addListener === 'function') {
+      // fallback for older browsers
+      mq.addListener((e) => {
+        applyTheme(e.matches ? 'dark' : 'light');
+      });
+    }
+
+    // Expose a setter so existing UI toggle code can call window.setTheme('dark'|'light'|'auto')
+    // - 'dark'   : force dark theme and save preference
+    // - 'light'  : force light theme and save preference
+    // - 'auto'   : remove saved preference and follow system preference
+    window.setTheme = function(theme) {
+      try {
+        if (theme === 'dark' || theme === 'light') {
+          localStorage.setItem(STORAGE_KEY, theme);
+          applyTheme(theme);
+        } else {
+          // 'auto' or unknown → remove stored preference and follow system immediately
+          localStorage.removeItem(STORAGE_KEY);
+          const sys = mq && mq.matches ? 'dark' : 'light';
+          applyTheme(sys);
+        }
+      } catch (e) {
+        // storage might be blocked; still apply theme without saving
+        const sys = theme === 'dark' ? 'dark' : (theme === 'light' ? 'light' : (mq && mq.matches ? 'dark' : 'light'));
+        applyTheme(sys);
+      }
+    };
+
+    // Attach delegated click listener for elements with data-theme-toggle attribute
+    try {
+      document.addEventListener('click', function (ev) {
+        const btn = ev.target && (ev.target.closest ? ev.target.closest('[data-theme-toggle]') : null);
+        if (!btn) return;
+        ev.preventDefault();
+        const mode = btn.getAttribute('data-theme-toggle') || 'toggle'; // 'dark'|'light'|'auto'|'toggle'
+        if (mode === 'toggle') {
+          const current = (document.documentElement.getAttribute('data-theme') === 'dark') ? 'dark' : 'light';
+          window.setTheme(current === 'dark' ? 'light' : 'dark');
+        } else {
+          window.setTheme(mode);
+        }
+      }, { passive: true });
+    } catch (e) { /* ignore */ }
+
+  })();
+  </script>
+  <!-- END: Automatic theme toggle script -->
 
 </body>
 </html>

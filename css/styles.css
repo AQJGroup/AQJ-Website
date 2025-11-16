@@ -1,7 +1,8 @@
 ﻿/* frontend/css/styles.css
    Cleaned & consistent version:
    - working dark/light theme switch (supports html.light-theme / html.dark-theme)
-   - follows system preference when neither class is set
+   - supports html[data-theme="..."] and html.dark / html.light for compatibility
+   - follows system preference when neither class/attribute is set
    - single logo size variable (--logo-height)
    - improved theme toggle button styles & accessibility
    - defensive image rules & responsive tweaks preserved
@@ -20,10 +21,19 @@
   --header-bg: rgba(0,0,0,0.45);
   --transition-speed: 200ms;
   --shadow-strong: 0 8px 20px rgba(0,0,0,0.5);
+  --marquee-pill-dark-bg: rgba(255,255,255,0.04);
+  --marquee-pill-light-bg: rgba(0,0,0,0.06);
+  --marquee-pill-dark-color: #fff;
+  --marquee-pill-light-color: #111;
 }
 
-/* If author explicitly sets a theme class on <html>, use those */
-html.dark-theme {
+/* --------- Theme signal compatibility: support several ways theme can be set --------- */
+/* your older CSS used html.dark-theme / html.light-theme; the script uses data-theme attr
+   and may also toggle html.dark — accept all of them so CSS responds consistently. */
+
+html.dark-theme,
+html[data-theme="dark"],
+html.dark {
   --bg: #0f0f0f;
   --surface: #121212;
   --card: #0e0e0e;
@@ -31,21 +41,27 @@ html.dark-theme {
   --muted: #bdbdbd;
   --text: #ffffff;
   --header-bg: rgba(0,0,0,0.45);
+  --marquee-pill-bg: var(--marquee-pill-dark-bg);
+  --marquee-pill-color: var(--marquee-pill-dark-color);
 }
 
-html.light-theme {
+html.light-theme,
+html[data-theme="light"],
+html.light {
   --bg: #ffffff;
   --surface: #f7f7f7;
   --card: #ffffff;
   --accent: #d6a21f;
   --muted: #555555;
   --text: #111111;
-  --header-bg: rgba(255,255,255,0.9);
+  --header-bg: rgba(255,255,255,0.95);
+  --marquee-pill-bg: var(--marquee-pill-light-bg);
+  --marquee-pill-color: var(--marquee-pill-light-color);
 }
 
-/* If neither class is present, follow system preference */
+/* If neither class/attribute is present, follow system preference */
 @media (prefers-color-scheme: dark) {
-  html:not(.light-theme):not(.dark-theme) {
+  html:not(.light-theme):not(.dark-theme):not([data-theme]):not(.dark):not(.light) {
     --bg: #0f0f0f;
     --surface: #121212;
     --card: #0e0e0e;
@@ -53,17 +69,21 @@ html.light-theme {
     --muted: #bdbdbd;
     --text: #ffffff;
     --header-bg: rgba(0,0,0,0.45);
+    --marquee-pill-bg: var(--marquee-pill-dark-bg);
+    --marquee-pill-color: var(--marquee-pill-dark-color);
   }
 }
 @media (prefers-color-scheme: light) {
-  html:not(.light-theme):not(.dark-theme) {
+  html:not(.light-theme):not(.dark-theme):not([data-theme]):not(.dark):not(.light) {
     --bg: #ffffff;
     --surface: #f7f7f7;
     --card: #ffffff;
     --accent: #d6a21f;
     --muted: #555555;
     --text: #111111;
-    --header-bg: rgba(255,255,255,0.9);
+    --header-bg: rgba(255,255,255,0.95);
+    --marquee-pill-bg: var(--marquee-pill-light-bg);
+    --marquee-pill-color: var(--marquee-pill-light-color);
   }
 }
 
@@ -101,6 +121,7 @@ img {
 }
 
 /* ---------- Header / Nav / Hero ---------- */
+/* Use logo variable (kept) */
 .brand img.logo,
 header .brand img.logo,
 .site-header .logo img {
@@ -113,7 +134,7 @@ header .brand img.logo,
 
 /* Header frame */
 .site-header {
-  background: var(--surface);
+  background: var(--header-bg);
   padding: 18px 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   position: sticky;
@@ -122,6 +143,21 @@ header .brand img.logo,
   backdrop-filter: saturate(120%) blur(4px);
   transition: background var(--transition-speed) ease, border-color var(--transition-speed) ease;
 }
+
+/* Border color for light theme: override to subtle darker border */
+html.light-theme .site-header,
+html[data-theme="light"] .site-header,
+html.light .site-header {
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+}
+
+/* If dark theme explicitly set, ensure border suits dark */
+html.dark-theme .site-header,
+html[data-theme="dark"] .site-header,
+html.dark .site-header {
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
 .site-header .logo img { height: var(--logo-height); display: block; }
 
 /* Theme toggle button */
@@ -151,13 +187,17 @@ header .brand img.logo,
   box-shadow: 0 6px 18px rgba(0,0,0,0.12);
 }
 
-/* Make icon color adapt per theme */
-html.light-theme #themeToggle {
+/* Make icon color adapt per theme: support both class and data-theme */
+html.light-theme #themeToggle,
+html[data-theme="light"] #themeToggle,
+html.light #themeToggle {
   border-color: rgba(0, 0, 0, 0.15);
   color: #d6a21f;
   background: rgba(0, 0, 0, 0.03);
 }
-html.dark-theme #themeToggle {
+html.dark-theme #themeToggle,
+html[data-theme="dark"] #themeToggle,
+html.dark #themeToggle {
   border-color: rgba(255, 255, 255, 0.08);
   background: rgba(255, 255, 255, 0.02);
   color: var(--accent);
@@ -263,6 +303,89 @@ html.dark-theme #themeToggle {
   color: var(--accent);
 }
 
+/* ---------- Top marquee adjustments (make visible & theme-aware) ---------- */
+/* Ensure marquee sits above header/hero overlays and is always visible */
+.top-marquee {
+  width:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+  position:relative;
+  z-index: 95; /* above header's z-index 90 */
+  pointer-events: none;
+}
+
+/* Pill styling: use theme-aware variables */
+.top-marquee .marquee-pill {
+  background: var(--marquee-pill-bg, rgba(255,255,255,0.04));
+  color: var(--marquee-pill-color, #fff);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+  padding:8px 36px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  font-weight:700;
+  will-change: transform, opacity;
+  opacity: 1; /* ensure visible */
+  pointer-events: auto;
+}
+
+/* translation text color */
+.top-marquee .marquee-pill .trans {
+  color: var(--muted);
+  font-family: "Poppins", sans-serif;
+  font-size: 0.85rem;
+}
+
+/* If hero overlay hides marquee, ensure marquee is above (already done via z-index) */
+.top-marquee::before,
+.top-marquee::after { /* keep the edge masks if present elsewhere, ensure they remain visible */ 
+  content: "";
+  position: absolute;
+  top: 0; bottom: 0; width: 6%;
+  z-index: 96;
+}
+
+/* soft fade masks preserved, but make sure they adapt on light theme if needed */
+.top-marquee::before { left: 0; background: linear-gradient(to right, rgba(0,0,0,0.6), rgba(0,0,0,0)); }
+.top-marquee::after  { right:0; background: linear-gradient(to left, rgba(0,0,0,0.6), rgba(0,0,0,0)); }
+
+/* -- Light theme: make the top marquee pill fully white with black content -- */
+html.light-theme .top-marquee .marquee-pill,
+html[data-theme="light"] .top-marquee .marquee-pill,
+html.light .top-marquee .marquee-pill {
+  /* white pill and black text */
+  background: #ffffff !important;
+  color: #000000 !important;
+
+  /* softer shadow for light background */
+  box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+  /* keep pill padding / radius unchanged */
+  padding: 8px 36px;
+  border-radius: 999px;
+}
+
+/* Translation / secondary text inside the pill should be visibly dark */
+html.light-theme .top-marquee .marquee-pill .trans,
+html[data-theme="light"] .top-marquee .marquee-pill .trans,
+html.light .top-marquee .marquee-pill .trans {
+  color: #444; /* dark-muted for good contrast */
+}
+
+/* Adapt marquee edge masks to light theme so fades remain subtle */
+html.light-theme .top-marquee::before,
+html[data-theme="light"] .top-marquee::before,
+html.light .top-marquee::before {
+  background: linear-gradient(to right, rgba(255,255,255,0.95), rgba(255,255,255,0));
+}
+html.light-theme .top-marquee::after,
+html[data-theme="light"] .top-marquee::after,
+html.light .top-marquee::after {
+  background: linear-gradient(to left, rgba(255,255,255,0.95), rgba(255,255,255,0));
+}
+
 /* ---------- Sections ---------- */
 .intro, .software, .services { padding: 48px 0; }
 .site-footer {
@@ -355,3 +478,158 @@ html.dark-theme #themeToggle {
 }
 
 /* End of file */
+
+/* ---------- FORCE light-theme marquee & masks (override page-local styles) ---------- */
+/* Covers theme on html OR body, class OR data-attr, and legacy .light */
+html.light-theme .top-marquee,
+html[data-theme="light"] .top-marquee,
+html.light .top-marquee,
+body.light-theme .top-marquee,
+body[data-theme="light"] .top-marquee,
+body.light .top-marquee {
+  background: #ffffff !important;
+  border-bottom: 1px solid rgba(0,0,0,0.06) !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important; /* if page set a dark blur, neutralise it for the white bar */
+}
+
+/* Fix the edge masks so they are subtle on white */
+html.light-theme .top-marquee::before,
+html[data-theme="light"] .top-marquee::before,
+html.light .top-marquee::before,
+body.light-theme .top-marquee::before,
+body[data-theme="light"] .top-marquee::before,
+body.light .top-marquee::before {
+  background: linear-gradient(to right, rgba(255,255,255,0.95), rgba(255,255,255,0)) !important;
+}
+html.light-theme .top-marquee::after,
+html[data-theme="light"] .top-marquee::after,
+html.light .top-marquee::after,
+body.light-theme .top-marquee::after,
+body[data-theme="light"] .top-marquee::after,
+body.light .top-marquee::after {
+  background: linear-gradient(to left, rgba(255,255,255,0.95), rgba(255,255,255,0)) !important;
+}
+
+/* Make the pill white with black content and adjust shadow for light background */
+html.light-theme .top-marquee .marquee-pill,
+html[data-theme="light"] .top-marquee .marquee-pill,
+html.light .top-marquee .marquee-pill,
+body.light-theme .top-marquee .marquee-pill,
+body[data-theme="light"] .top-marquee .marquee-pill,
+body.light .top-marquee .marquee-pill {
+  background: #ffffff !important;
+  color: #000000 !important;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.06) !important;
+}
+
+/* Ensure translation / secondary text inside the pill is dark-muted */
+html.light-theme .top-marquee .marquee-pill .trans,
+html[data-theme="light"] .top-marquee .marquee-pill .trans,
+html.light .top-marquee .marquee-pill .trans,
+body.light-theme .top-marquee .marquee-pill .trans,
+body[data-theme="light"] .top-marquee .marquee-pill .trans,
+body.light .top-marquee .marquee-pill .trans {
+  color: #444 !important;
+}
+
+/* Also: if some pages set explicit .top-marquee height/padding, keep the pill vertically centered */
+html.light-theme .top-marquee .marquee-pill,
+html[data-theme="light"] .top-marquee .marquee-pill,
+html.light .top-marquee .marquee-pill,
+body.light-theme .top-marquee .marquee-pill,
+body[data-theme="light"] .top-marquee .marquee-pill,
+body.light .top-marquee .marquee-pill {
+  /* keep the original spacing intact; these are non-forcing but ensure visibility */
+  padding: 8px 36px;
+  border-radius: 999px;
+}
+
+/* ---------- FORCE light-theme header & marquee appearance (drop-in override) ---------- */
+/* Covers theme on html OR body, class OR data-attr, and legacy .light */
+html.light-theme .site-header,
+html[data-theme="light"] .site-header,
+html.light .site-header,
+body.light-theme .site-header,
+body[data-theme="light"] .site-header,
+body.light .site-header {
+  background: #ffffff !important;            /* white header */
+  color: #111 !important;                    /* dark text */
+  border-bottom: 1px solid rgba(0,0,0,0.06) !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;         /* neutralise dark blur if set inline */
+}
+
+/* Ensure header children inherit appropriate colors */
+html.light-theme .site-header * ,
+html[data-theme="light"] .site-header * ,
+html.light .site-header * ,
+body.light-theme .site-header * ,
+body[data-theme="light"] .site-header * ,
+body.light .site-header * {
+  color: inherit !important;
+}
+
+/* Nav links in header -> dark/ muted in light theme */
+html.light-theme .site-header .nav a,
+html[data-theme="light"] .site-header .nav a,
+html.light .site-header .nav a,
+body.light-theme .site-header .nav a,
+body[data-theme="light"] .site-header .nav a,
+body.light .site-header .nav a {
+  color: #444 !important;
+}
+html.light-theme .site-header .nav a:hover,
+html[data-theme="light"] .site-header .nav a:hover,
+html.light .site-header .nav a:hover,
+body.light-theme .site-header .nav a:hover,
+body[data-theme="light"] .site-header .nav a:hover,
+body.light .site-header .nav a:hover {
+  color: var(--accent) !important;
+}
+
+/* Theme toggle button adjustments (so it looks correct on light background) */
+html.light-theme #themeToggle,
+html[data-theme="light"] #themeToggle,
+html.light #themeToggle,
+body.light-theme #themeToggle,
+body[data-theme="light"] #themeToggle,
+body.light #themeToggle {
+  border-color: rgba(0,0,0,0.12) !important;
+  background: rgba(0,0,0,0.03) !important;
+  color: var(--accent) !important;
+}
+
+/* Ensure logo remains visible and not darkened by filters */
+html.light-theme .site-header .logo img,
+html[data-theme="light"] .site-header .logo img,
+html.light .site-header .logo img,
+body.light-theme .site-header .logo img,
+body[data-theme="light"] .site-header .logo img,
+body.light .site-header .logo img {
+  filter: none !important;
+  opacity: 1 !important;
+}
+
+/* Also re-apply the white marquee bar (if needed) — keeps both header + marquee consistent */
+html.light-theme .top-marquee,
+html[data-theme="light"] .top-marquee,
+html.light .top-marquee,
+body.light-theme .top-marquee,
+body[data-theme="light"] .top-marquee,
+body.light .top-marquee {
+  background: #ffffff !important;
+  border-bottom: 1px solid rgba(0,0,0,0.06) !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+html.light-theme .top-marquee .marquee-pill,
+html[data-theme="light"] .top-marquee .marquee-pill,
+html.light .top-marquee .marquee-pill,
+body.light-theme .top-marquee .marquee-pill,
+body[data-theme="light"] .top-marquee .marquee-pill,
+body.light .top-marquee .marquee-pill {
+  background: #ffffff !important;
+  color: #000 !important;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.06) !important;
+}
