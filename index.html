@@ -348,8 +348,9 @@
   <script src="../js/app.js" defer></script>
 
   <!-- web-ifc-viewer + three.js via CDN (UMD builds) - must be loaded before viewer init -->
-  <script src="https://unpkg.com/three@0.154.0/build/three.min.js"></script>
-  <script src="https://unpkg.com/web-ifc-viewer@0.0.73/dist/index.umd.js"></script>
+  <!-- NOTE: replaced web-ifc-viewer include with an unpkg UMD build that exports IfcViewerAPI -->
+  <script src="https://unpkg.com/three@0.154.0/build/three.min.js" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/web-ifc-viewer/dist/index.umd.js" crossorigin="anonymous"></script>
 
   <script>
     (function () {
@@ -472,29 +473,114 @@
     })();
   </script>
 
-  <!-- Viewer init script (runs after three + web-ifc-viewer are loaded) -->
+  <!-- Viewer init script (robust, logs errors & forces mesh addition) -->
   <script>
     (function () {
       document.addEventListener('DOMContentLoaded', async () => {
         const container = document.getElementById('ifc-viewer-container');
-        if (!container) return;
+        if (!container) {
+          console.error('IFC viewer container (#ifc-viewer-container) not found.');
+          return;
+        }
 
-        // Create viewer instance
-        const viewer = new window.IfcViewerAPI({ container, backgroundColor: 0x101010 });
+        // Ensure library loaded
+        if (!window.IfcViewerAPI) {
+          console.error('IfcViewerAPI not found. Make sure web-ifc-viewer script is included before this script.');
+          return;
+        }
 
-        // ===== IMPORTANT:
-        // If you host web-ifc.wasm locally, set the path to the folder containing web-ifc.wasm.
-        // Example if you put wasm in: /frontend/public/libs/web-ifc/web-ifc.wasm
-        // then use: await viewer.IFC.setWasmPath('/libs/web-ifc/');
-        //
-        // For the CDN fallback we set the unpkg package root (viewer will request web-ifc.wasm):
-        await viewer.IFC.setWasmPath('https://unpkg.com/web-ifc@0.0.134/');
+        // Create viewer instance and expose for console debugging
+        window.viewer = new window.IfcViewerAPI({ container, backgroundColor: 0x101010 });
+        console.log('IfcViewerAPI created:', !!window.viewer);
 
-        let edgesShown = false;
-        let darkBg = true;
+        // Set WASM path (CDN for quick testing).
+        // For production you should host web-ifc.wasm on your origin and set the folder path.
+        try {
+          await window.viewer.IFC.setWasmPath('https://unpkg.com/web-ifc@0.0.134/');
+          console.log('web-ifc.wasm path set (CDN).');
+        } catch (err) {
+          console.error('Failed to set wasm path or download wasm from CDN. Error:', err);
+          alert('IFC viewer could not initialise: wasm load failed. Check console.');
+          return;
+        }
+
+        // Renderer tweaks
+        try {
+          window.viewer.context.renderer.postproduction.active = true;
+          window.viewer.context.renderer.postproduction.bloomStrength = 0.12;
+          window.viewer.context.renderer.postproduction.bloomRadius = 0.45;
+        } catch (e) { /* ignore if not available */ }
+
         let loadedModel = null;
 
-        // UI refs
+        async function clearModel() {
+          try {
+            if (!loadedModel) return;
+            if (loadedModel.modelID !== undefined) {
+              window.viewer.scene.removeModel(loadedModel.modelID);
+            } else if (loadedModel.mesh) {
+              window.viewer.context.getScene().remove(loadedModel.mesh);
+            }
+          } catch (e) {
+            console.warn('Error clearing previous model', e);
+          }
+          loadedModel = null;
+        }
+
+        async function loadFromUrl(url) {
+          try {
+            console.log('Loading IFC from URL:', url);
+            await clearModel();
+            const model = await window.viewer.IFC.loadIfcUrl(url, {
+              onProgress: (ev) => { console.log('URL load progress:', ev); }
+            });
+            console.log('Loaded model object:', model);
+            loadedModel = model;
+
+            // Add mesh explicitly if present
+            if (model.mesh && !window.viewer.context.getScene().children.includes(model.mesh)) {
+              window.viewer.context.getScene().add(model.mesh);
+              console.log('Model mesh added to scene.');
+            }
+
+            try { window.viewer.fitToFrame(); } catch(e) { console.warn('fitToFrame failed', e); }
+          } catch (err) {
+            console.error('Error loading IFC from URL:', err);
+            alert('Could not load IFC from URL. Check console for details (CORS/404/wasm).');
+          }
+        }
+
+        async function loadFromFile(file) {
+          try {
+            if (!file) {
+              console.warn('No file provided to loadFromFile.');
+              return;
+            }
+            console.log('Loading local file:', file.name, file.size, 'bytes');
+            await clearModel();
+            const url = URL.createObjectURL(file);
+            try {
+              const model = await window.viewer.IFC.loadIfcUrl(url, {
+                onProgress: (ev) => { console.log('File load progress:', ev); }
+              });
+              console.log('Local model loaded:', model);
+              loadedModel = model;
+
+              if (model.mesh && !window.viewer.context.getScene().children.includes(model.mesh)) {
+                window.viewer.context.getScene().add(model.mesh);
+                console.log('Local model mesh added to scene.');
+              }
+              try { window.viewer.fitToFrame(); } catch(e) { console.warn('fitToFrame failed', e); }
+            } finally {
+              setTimeout(() => URL.revokeObjectURL(url), 2000);
+            }
+          } catch (err) {
+            console.error('Error loading local IFC file:', err);
+            alert('Failed to load local IFC — see console for details.');
+          }
+        }
+
+        // wire UI
         const fileInput = document.getElementById('ifcFileInput');
         const urlInput = document.getElementById('ifcUrlInput');
         const loadUrlBtn = document.getElementById('ifcLoadUrlBtn');
@@ -502,88 +588,57 @@
         const wireBtn = document.getElementById('ifcWireBtn');
         const bgBtn = document.getElementById('ifcBgBtn');
 
-        async function clearModel() {
-          try {
-            if (!loadedModel) return;
-            viewer.scene.removeModel(loadedModel.modelID);
-            loadedModel = null;
-          } catch (e) { /* ignore */ }
+        if (fileInput) {
+          fileInput.addEventListener('change', (ev) => {
+            const f = ev.target.files && ev.target.files[0];
+            if (f) loadFromFile(f);
+          });
+        } else {
+          console.warn('file input (#ifcFileInput) not found.');
         }
 
-        async function loadFromUrl(url) {
-          try {
-            await clearModel();
-            const model = await viewer.IFC.loadIfcUrl(url, { onProgress: () => {} });
-            loadedModel = model;
-            viewer.context.renderer.postproduction.active = true;
-            viewer.context.renderer.postproduction.bloomStrength = 0.15;
-            viewer.context.renderer.postproduction.bloomRadius = 0.5;
-            viewer.context.getScene().add(model.mesh);
-            viewer.fitToFrame();
-          } catch (err) {
-            console.error('Error loading IFC from URL:', err);
-            alert('Could not load IFC from URL. Check console for details.');
-          }
+        if (loadUrlBtn && urlInput) {
+          loadUrlBtn.addEventListener('click', () => {
+            const u = (urlInput.value || '').trim();
+            if (!u) { alert('Paste an IFC file URL then press Load'); return; }
+
+            // Try a HEAD first to detect CORS/404 quickly then load
+            fetch(u, { method: 'HEAD' })
+              .then(r => {
+                console.log('HEAD status for', u, r.status, r.headers.get('content-type'));
+                loadFromUrl(u);
+              })
+              .catch(err => {
+                console.warn('HEAD request failed; attempting load anyway (likely CORS). Error:', err);
+                loadFromUrl(u);
+              });
+          });
         }
 
-        async function loadFromFile(file) {
-          try {
-            if (!file) return;
-            await clearModel();
-            const url = URL.createObjectURL(file);
-            const model = await viewer.IFC.loadIfcUrl(url);
-            loadedModel = model;
-            viewer.context.renderer.postproduction.active = true;
-            viewer.fitToFrame();
-            setTimeout(() => URL.revokeObjectURL(url), 2000);
-          } catch (err) {
-            console.error('Error loading local IFC:', err);
-            alert('Could not load local IFC. See console.');
-          }
-        }
+        if (fitBtn) fitBtn.addEventListener('click', () => { try { window.viewer.fitToFrame(); } catch(e){ console.warn(e); } });
 
-        fileInput.addEventListener('change', (ev) => {
-          const f = ev.target.files && ev.target.files[0];
-          if (f) loadFromFile(f);
-        });
-
-        loadUrlBtn.addEventListener('click', () => {
-          const u = (urlInput.value || '').trim();
-          if (!u) { alert('Paste an IFC file URL then press Load'); return; }
-          loadFromUrl(u);
-        });
-
-        fitBtn.addEventListener('click', () => { try { viewer.fitToFrame(); } catch(e){} });
-        wireBtn.addEventListener('click', () => {
+        let edgesShown = false;
+        if (wireBtn) wireBtn.addEventListener('click', () => {
           edgesShown = !edgesShown;
-          if (!loadedModel) return;
-          if (edgesShown) viewer.edges.renderEdges(loadedModel.modelID);
-          else viewer.edges.removeAll();
-        });
-        bgBtn.addEventListener('click', () => {
-          darkBg = !darkBg;
-          const color = darkBg ? 0x101010 : 0xffffff;
-          viewer.context.getScene().background = new THREE.Color(color);
+          if (!loadedModel) return console.warn('No model loaded to toggle edges.');
+          if (edgesShown) window.viewer.edges.renderEdges(loadedModel.modelID);
+          else window.viewer.edges.removeAll();
         });
 
-        container.addEventListener('click', async (ev) => {
-          const result = await viewer.pickIfcItem({ mouse: ev, pickSurface: true });
-          if (result) {
-            const { modelID, id } = result;
-            viewer.IFC.loader.ifcManager.applyWebIfcConfig({ COORDINATE_TO_WORLD: true });
-            viewer.manager.clearAllHighlights && viewer.manager.clearAllHighlights();
-            viewer.createSubset({ modelID, ids: [id], removePrevious: true, material: { color: 0xff0000 } });
-          }
+        if (bgBtn) bgBtn.addEventListener('click', () => {
+          try {
+            const scene = window.viewer.context.getScene();
+            const current = scene.background;
+            const dark = current && current.equals && current.equals(new THREE.Color(0x101010));
+            scene.background = new THREE.Color(dark ? 0xffffff : 0x101010);
+          } catch(e) { console.warn('toggle bg failed', e); }
         });
 
-        window.addEventListener('keydown', (e) => {
-          if (e.key === 'Escape') {
-            viewer.clearAllHighlights && viewer.clearAllHighlights();
-            viewer.edges.removeAll && viewer.edges.removeAll();
-          }
-        });
+        // expose loaded model for debugging
+        window._ifcLoadedModel = () => loadedModel;
 
-      }); // DOMContentLoaded
+        console.log('IFC viewer ready. Use the file control or paste an IFC URL to load a model.');
+      });
     })();
   </script>
 

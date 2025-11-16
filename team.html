@@ -6,13 +6,12 @@
   <title>Team — AQJ Group</title>
   <link rel="icon" href="favicon.png" type="image/png">
   <link rel="stylesheet" href="../css/styles.css">
-  <!-- Fonts for Arabic + English verse block -->
   <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
 
   <style>
     :root { --marquee-duration: 18s; }
 
-    /* Top marquee (robust, uniform linear movement) */
+    /* -------- Top marquee (unchanged) -------- */
     .top-marquee {
       width:100%;
       height:56px;
@@ -28,7 +27,6 @@
       box-sizing:border-box;
       backdrop-filter: blur(4px);
     }
-
     .runner {
       position:absolute;
       top:50%;
@@ -59,8 +57,6 @@
       opacity: 0;
       animation: pillOpacity var(--marquee-duration) linear infinite;
     }
-    .runner.runner-2 .marquee-pill { animation-delay: calc(var(--marquee-duration) / -2); }
-
     .marquee-pill .trans {
       font-family: "Poppins", sans-serif;
       font-size:0.82rem;
@@ -69,13 +65,10 @@
       white-space: nowrap;
     }
 
-    /* uniform linear movement */
     @keyframes runnerTravel {
       0% { transform: translateX(calc(100vw)) translateY(-50%); }
       100% { transform: translateX(calc(-100% - 100vw)) translateY(-50%); }
     }
-
-    /* gentle fade in/out only */
     @keyframes pillOpacity {
       0% { opacity: 0; }
       10% { opacity: 1; }
@@ -83,7 +76,6 @@
       100% { opacity: 0; }
     }
 
-    /* edge masks */
     .top-marquee::before,
     .top-marquee::after {
       content:"";
@@ -97,52 +89,164 @@
     .top-marquee:hover .runner,
     .top-marquee:hover .runner .marquee-pill { animation-play-state: paused; }
 
-    /* Featured verse block */
-    .verse-block {
-      max-width: 920px;
-      margin: 18px auto;
-      padding: 14px 18px;
-      border-radius: 12px;
-      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-      border: 1px solid rgba(255,255,255,0.03);
-      box-shadow: 0 6px 18px rgba(0,0,0,0.22);
-      color: var(--muted, #d6d6d6);
-      text-align: center;
-      position: relative;
-    }
-    .verse-block .arabic {
-      font-family: "Amiri", serif;
-      font-size: 1.45rem;
-      font-weight: 700;
-      color: #ffffff;
-      direction: rtl;
-      line-height: 1.25;
-      margin-bottom: 8px;
-      text-shadow: 0 1px 6px rgba(0,0,0,0.35);
-    }
-    .verse-block .translation {
-      font-family: "Poppins", sans-serif;
-      font-size: 1rem;
-      color: rgba(255,255,255,0.92);
-      margin-bottom: 8px;
-    }
-    .verse-block .caption {
-      font-family: "Poppins", sans-serif;
-      font-size: 0.94rem;
-      color: var(--muted, #cfcfcf);
-      margin-top: 6px;
-      font-weight: 300;
+    /* ---------- TEAM LAYOUT ---------- */
+
+    main.section { padding-top: 32px; }
+
+    .team-heading {
+      text-align:center;
+      margin-top:20px;
+      margin-bottom:10px;
     }
 
+    /* Row containers */
+    .founders-row,
+    .cofounders-row {
+      display:flex;
+      justify-content:center;
+      gap:28px;
+      flex-wrap:wrap;
+      max-width:1080px;
+      margin:30px auto 0;
+    }
+
+    .cofounders-row { margin-top:24px; }
+
+    .team-grid {
+      display:grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap:28px;
+      max-width:1080px;
+      margin:32px auto 80px;
+      align-items:flex-start;
+    }
+
+    /* Base card */
+    .team-card {
+      width:220px;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.03);
+      padding:18px;
+      border-radius:12px;
+      text-align:center;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.45);
+      color:#ddd;
+      position:relative;
+    }
+
+    .team-photo {
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      margin-bottom:8px;
+    }
+
+    .team-photo img {
+      width:88px;
+      height:88px;
+      object-fit:cover;
+      border-radius:50%;
+      border:6px solid rgba(255,255,255,0.03);
+      box-shadow: inset 0 2px 6px rgba(0,0,0,0.6);
+      cursor:pointer;
+    }
+
+    .team-name {
+      margin:8px 0 4px;
+      font-size:0.98rem;
+      font-weight:700;
+      color:#fff;
+      cursor:pointer;
+      text-decoration:none;
+      display:block;
+    }
+
+    .team-role {
+      font-size:0.82rem;
+      color:var(--muted,#cfcfcf);
+      margin-bottom:8px;
+    }
+
+    .team-bio {
+      font-size:0.82rem;
+      color:#bdbdbd;
+      margin-bottom:4px;
+      min-height:32px;
+    }
+
+    /* BIG founders (roughly double visual size) */
+    .team-card.founder {
+      width:280px;
+      padding:24px;
+    }
+
+    .team-card.founder .team-photo img {
+      width:120px;
+      height:120px;
+    }
+
+    .team-card.founder .team-name {
+      font-size:1.05rem;
+    }
+
+    /* ---------- MODAL (member detail) ---------- */
+
+    .modal-backdrop {
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,0.6);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      z-index:9999;
+      padding:24px;
+    }
+    .modal {
+      width:100%;
+      max-width:760px;
+      background:#0f0f10;
+      border-radius:12px;
+      padding:22px;
+      border:1px solid rgba(255,255,255,0.04);
+      box-shadow:0 20px 60px rgba(0,0,0,0.7);
+      color:#eee;
+    }
+    .modal-head {
+      display:flex;
+      gap:16px;
+      align-items:center;
+      margin-bottom:8px;
+    }
+    .modal-head img {
+      width:96px;
+      height:96px;
+      border-radius:50%;
+      object-fit:cover;
+      border:6px solid rgba(255,255,255,0.03);
+    }
+    .modal-title { font-size:1.1rem; font-weight:700; margin-bottom:4px; }
+    .modal-role { font-size:0.95rem; color:var(--muted,#cfcfcf); margin-bottom:4px; }
+    .modal-body { margin-top:8px; font-size:0.95rem; line-height:1.45; color:#dadada; }
+    .modal-close {
+      background:transparent;
+      border:1px solid rgba(255,255,255,0.06);
+      color:#fff;
+      padding:6px 10px;
+      border-radius:8px;
+      cursor:pointer;
+      margin-left:auto;
+    }
+
+    /* Responsive tweaks */
     @media (max-width:900px) {
-      :root { --marquee-duration: 14s; }
-      .top-marquee { height:52px; }
-      .marquee-pill { padding:6px 18px; font-size:1rem; }
-      .marquee-pill .trans { font-size:0.75rem; margin-left:8px; }
-      .verse-block { margin:12px; padding:10px 12px; }
-      .verse-block .arabic { font-size:1.15rem; }
-      .verse-block .translation { font-size:0.95rem; }
-      .verse-block .caption { font-size:0.88rem; }
+      .founders-row,
+      .cofounders-row { gap:20px; }
+    }
+    @media (max-width:480px) {
+      .team-card,
+      .team-card.founder {
+        width:100%;
+      }
     }
   </style>
 </head>
@@ -167,76 +271,224 @@
   </div>
 
   <main class="container section">
-    <h1>Meet Our Team</h1>
+    <h1 class="team-heading">Meet Our Team</h1>
 
+    <!-- ROW 1: FOUNDERS ONLY -->
+    <div class="founders-row">
+      <article class="team-card founder"
+               data-fullname="Sayyed Sajjad Hussain"
+               data-role="Founder"
+               data-bio="Strategic &amp; operational lead. Add longer biography here; qualifications; responsibilities; contact details."
+               data-img="../assets/images/team/sajjad_sayyed.jpg">
+        <div class="team-photo">
+          <img src="../assets/images/team/sajjad_sayyed.jpg" alt="Sayyed Sajjad Hussain">
+        </div>
+        <a class="team-name" tabindex="0">Sayyed Sajjad Hussain</a>
+        <div class="team-role">Founder</div>
+        <div class="team-bio">Strategic &amp; operational lead.</div>
+      </article>
+
+      <article class="team-card founder"
+               data-fullname="Naik Rehan"
+               data-role="Founder"
+               data-bio="Co-founder, advisory &amp; business development. Add biography, achievements and business responsibilities here."
+               data-img="../assets/images/team/rehan_naik.jpg">
+        <div class="team-photo">
+          <img src="../assets/images/team/rehan_naik.jpg" alt="Naik Rehan">
+        </div>
+        <a class="team-name" tabindex="0">Naik Rehan</a>
+        <div class="team-role">Founder</div>
+        <div class="team-bio">Co-founder / advisory &amp; business.</div>
+      </article>
+    </div>
+
+    <!-- ROW 2: CO-FOUNDERS -->
+    <div class="cofounders-row">
+      <article class="team-card"
+               data-fullname="Co-Founder (vacant)"
+               data-role="Co-Founder"
+               data-bio="Vacant — add name &amp; biography when the role is filled."
+               data-img="../assets/images/team/placeholder.png">
+        <div class="team-photo">
+          <img src="../assets/images/team/placeholder.png" alt="Co-Founder (vacant)">
+        </div>
+        <a class="team-name" tabindex="0">Co-Founder</a>
+        <div class="team-role">Vacant</div>
+        <div class="team-bio">Position open / NA</div>
+      </article>
+
+      <article class="team-card"
+               data-fullname="Co-Founder (vacant)"
+               data-role="Co-Founder"
+               data-bio="Vacant — add name &amp; biography when the role is filled."
+               data-img="../assets/images/team/placeholder.png">
+        <div class="team-photo">
+          <img src="../assets/images/team/placeholder.png" alt="Co-Founder (vacant)">
+        </div>
+        <a class="team-name" tabindex="0">Co-Founder</a>
+        <div class="team-role">Vacant</div>
+        <div class="team-bio">Position open / NA</div>
+      </article>
+    </div>
+
+    <!-- ROW 3+: OTHER TEAM MEMBERS -->
     <div class="team-grid">
-      <article class="team-card">
-        <div class="team-photo"><img src="../assets/images/team/sajjad_sayyed.jpg" alt="Sajjad Sayyed — Founder & Managing Director"></div>
-        <h3 class="team-name">Sajjad Sayyed</h3>
-        <div class="team-role">Founder & Managing Director</div>
-        <p class="team-bio">Handles all operations, design, and decision-making.</p>
+
+      <article class="team-card"
+               data-fullname="Sayyed Samra"
+               data-role="Group Manager — Information Systems and Digital"
+               data-bio="Leads BIM and digital systems, ensuring data quality and integration across projects."
+               data-img="../assets/images/team/samra.jpg">
+        <div class="team-photo">
+          <img src="../assets/images/team/samra.jpg" alt="Sayyed Samra">
+        </div>
+        <a class="team-name" tabindex="0">Sayyed Samra</a>
+        <div class="team-role">Group Manager — Information Systems and Digital</div>
+        <div class="team-bio">Leads BIM &amp; digital systems.</div>
       </article>
 
-      <article class="team-card">
-        <div class="team-photo"><img src="../assets/images/team/elder_sister.jpg" alt="Elder Sister — Software Engineer"></div>
-        <h3 class="team-name">Elder Sister</h3>
-        <div class="team-role">Software Engineer</div>
-        <p class="team-bio">Manages company website and tech operations.</p>
+      <article class="team-card"
+               data-fullname="Naik Seemeen"
+               data-role="Head of Human Resources"
+               data-bio="Oversees HR, recruitment, training and employee relations for AQJ Group."
+               data-img="../assets/images/team/seemeen.jpg">
+        <div class="team-photo">
+          <img src="../assets/images/team/seemeen.jpg" alt="Naik Seemeen">
+        </div>
+        <a class="team-name" tabindex="0">Naik Seemeen</a>
+        <div class="team-role">Head of Human Resources</div>
+        <div class="team-bio">Oversees HR, recruitment &amp; employee relations.</div>
       </article>
 
-      <article class="team-card">
-        <div class="team-photo"><img src="../assets/images/team/sadaquat_sayyed.jpg" alt="Sadaquat Sayyed — Junior Technical Head"></div>
-        <h3 class="team-name">Sadaquat Sayyed</h3>
-        <div class="team-role">Junior Technical Head</div>
-        <p class="team-bio">Supports site execution and project work.</p>
+      <article class="team-card"
+               data-fullname="Chief Finance Officer (vacant)"
+               data-role="Chief Finance Officer"
+               data-bio="Finance &amp; accounts leadership (vacant) — add details when appointed."
+               data-img="../assets/images/team/placeholder.png">
+        <div class="team-photo">
+          <img src="../assets/images/team/placeholder.png" alt="Chief Finance Officer (vacant)">
+        </div>
+        <a class="team-name" tabindex="0">Chief Finance Officer</a>
+        <div class="team-role">Vacant</div>
+        <div class="team-bio">Finance &amp; accounts leadership (vacant).</div>
       </article>
 
-      <article class="team-card">
-        <div class="team-photo"><img src="../assets/images/team/faisal_sayyed.jpg" alt="Faisal Sayyed — Junior Engineer"></div>
-        <h3 class="team-name">Faisal Sayyed</h3>
-        <div class="team-role">Junior Engineer</div>
-        <p class="team-bio">Learning and field trainee.</p>
+      <article class="team-card"
+               data-fullname="Sayyed Sadaquat"
+               data-role="Group General Manager"
+               data-bio="Oversees general management, coordination between teams, and delivery performance."
+               data-img="../assets/images/team/sadaquat_sayyed.jpg">
+        <div class="team-photo">
+          <img src="../assets/images/team/sadaquat_sayyed.jpg" alt="Sayyed Sadaquat">
+        </div>
+        <a class="team-name" tabindex="0">Sayyed Sadaquat</a>
+        <div class="team-role">Group General Manager</div>
+        <div class="team-bio">Oversees general management and coordination.</div>
       </article>
 
-      <article class="team-card">
-        <div class="team-photo"><img src="../assets/images/team/noorani.jpg" alt="Noorani — Junior Civil Engineer"></div>
-        <h3 class="team-name">Noorani</h3>
-        <div class="team-role">Junior Civil Engineer</div>
-        <p class="team-bio">Supports design and drafting tasks.</p>
+      <article class="team-card"
+               data-fullname="Sayyed Noorani"
+               data-role="Legal Advisor"
+               data-bio="Provides legal counsel, contract review and compliance guidance to AQJ Group."
+               data-img="../assets/images/team/noorani.jpg">
+        <div class="team-photo">
+          <img src="../assets/images/team/noorani.jpg" alt="Sayyed Noorani">
+        </div>
+        <a class="team-name" tabindex="0">Sayyed Noorani</a>
+        <div class="team-role">Legal Advisor</div>
+        <div class="team-bio">Provides legal counsel &amp; compliance advice.</div>
       </article>
 
-      <article class="team-card">
-        <div class="team-photo"><img src="../assets/images/team/rehan_naik.jpg" alt="Rehan Naik — Co-Founder (Advisory)"></div>
-        <h3 class="team-name">Rehan Naik</h3>
-        <div class="team-role">Co-Founder (Advisory)</div>
-        <p class="team-bio">Early contributor and ongoing advisor.</p>
+      <article class="team-card"
+               data-fullname="Business Development (TBD)"
+               data-role="Business Development"
+               data-bio="Future role for expanding AQJ Group's client base and partnerships."
+               data-img="../assets/images/team/placeholder.png">
+        <div class="team-photo">
+          <img src="../assets/images/team/placeholder.png" alt="Business Development">
+        </div>
+        <a class="team-name" tabindex="0">Business Development</a>
+        <div class="team-role">TBD</div>
+        <div class="team-bio">Business development — to be assigned.</div>
       </article>
 
-      <article class="team-card">
-        <div class="team-photo"><img src="../assets/images/team/rehans_sister.jpg" alt="Rehan’s Sister — Business Advisor"></div>
-        <h3 class="team-name">Rehan’s Sister</h3>
-        <div class="team-role">Business Advisor</div>
-        <p class="team-bio">Provides strategic and management advice.</p>
-      </article>
-
-      <article class="team-card">
-        <div class="team-photo"><img src="../assets/images/team/nousheen.jpg" alt="Nousheen — Future Partner (Civil)"></div>
-        <h3 class="team-name">Nousheen</h3>
-        <div class="team-role">Future Partner (Civil)</div>
-        <p class="team-bio">Civil engineering collaborator.</p>
-      </article>
-
-      <article class="team-card">
-        <div class="team-photo"><img src="../assets/images/team/nousheens_sister.jpg" alt="Nousheen’s Sister — Finance Advisor (CA in training)"></div>
-        <h3 class="team-name">Nousheen’s Sister</h3>
-        <div class="team-role">Finance Advisor (CA in training)</div>
-        <p class="team-bio">Manages accounting and finance planning.</p>
-      </article>
     </div>
   </main>
 
   <div id="footer-placeholder"></div>
   <script src="include-partials.js" defer></script>
   <script src="../js/app.js" defer></script>
+
+  <!-- MEMBER DETAIL MODAL -->
+  <div id="member-modal-backdrop" class="modal-backdrop" role="dialog" aria-hidden="true">
+    <div class="modal" role="document" aria-modal="true">
+      <div class="modal-head">
+        <img id="modal-img" src="../assets/images/team/placeholder.png" alt="">
+        <div style="flex:1;">
+          <div style="display:flex;align-items:flex-start;gap:12px;">
+            <div>
+              <div class="modal-title" id="modal-fullname">Full name</div>
+              <div class="modal-role" id="modal-role">Role</div>
+            </div>
+            <button id="modal-close" class="modal-close" aria-label="Close details">Close</button>
+          </div>
+        </div>
+      </div>
+      <div class="modal-body" id="modal-body">Long biography and details appear here.</div>
+    </div>
+  </div>
+
+  <script>
+    // Click image or name to open the detail modal
+    (function(){
+      const backdrop = document.getElementById('member-modal-backdrop');
+      const imgEl = document.getElementById('modal-img');
+      const nameEl = document.getElementById('modal-fullname');
+      const roleEl = document.getElementById('modal-role');
+      const bodyEl = document.getElementById('modal-body');
+      const closeBtn = document.getElementById('modal-close');
+
+      function openModalFromCard(card) {
+        const fullname = card.dataset.fullname || '';
+        const role = card.dataset.role || '';
+        const bio = card.dataset.bio || '';
+        const img = card.dataset.img || '../assets/images/team/placeholder.png';
+
+        imgEl.src = img;
+        imgEl.alt = fullname;
+        nameEl.textContent = fullname;
+        roleEl.textContent = role;
+        bodyEl.textContent = bio;
+
+        backdrop.style.display = 'flex';
+        backdrop.setAttribute('aria-hidden', 'false');
+        closeBtn.focus();
+      }
+
+      function closeModal() {
+        backdrop.style.display = 'none';
+        backdrop.setAttribute('aria-hidden', 'true');
+      }
+
+      document.addEventListener('click', function(ev){
+        const img = ev.target.closest('.team-photo img');
+        const name = ev.target.closest('.team-name');
+        if (img || name) {
+          const card = (img || name).closest('.team-card');
+          if (card) openModalFromCard(card);
+          return;
+        }
+        if (ev.target === backdrop) closeModal();
+      });
+
+      document.addEventListener('keydown', function(ev){
+        if (ev.key === 'Escape' && backdrop.style.display === 'flex') {
+          closeModal();
+        }
+      });
+
+      closeBtn.addEventListener('click', closeModal);
+    })();
+  </script>
 </body>
 </html>
